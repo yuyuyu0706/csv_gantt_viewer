@@ -3,6 +3,7 @@ import { state } from './state.js';
 import { ROW_H, BAR_H } from './constants.js';
 import { fmtMD, daysBetween } from './utils/date.js';
 import { drawDependencies } from './deps.js';
+import { updateToggleAllBtn, updateGlobalButtons } from './toggles.js';
 
 // ---- helpers（元の app.js 相当。window に無ければフォールバック実装）----
 const prioClassText = (window.prioClassText) ? window.prioClassText : function(p){
@@ -409,8 +410,8 @@ export function render(){
   renderHeader(totalDays, RIGHT_PAD);
   syncHeaderToGrid();
   fixBottomSync();
-  if (window.updateToggleAllBtn) window.updateToggleAllBtn();
-  if (window.updateGlobalButtons) window.updateGlobalButtons();
+  updateToggleAllBtn();
+  updateGlobalButtons();
 
   // 今日線
   const today=new Date();
