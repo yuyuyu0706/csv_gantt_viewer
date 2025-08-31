@@ -8,7 +8,7 @@ import { normHeaders, findHeaderIndex } from './js/utils/headers.js';
 import { LEFT_START_PAD_DAYS, ROW_H, BAR_H, CATEGORY_ORDER, catRank } from './js/constants.js';
 import { state } from './js/state.js';
 import { render, renderHeader, fixBottomSync } from './js/renderer.js';  // v62
-
+import { initEvents } from './js/events.js';  // v63
 
 // ===== Utils =====
 
@@ -56,7 +56,8 @@ function cmpByStartThenName(a, b){
 }
 
 // ===== DOM refs =====
-let fileInput, sampleBtn, liveToggle, zoomSel, fitBtn, csvInput, renderBtn, dropzone;
+//let fileInput, sampleBtn, liveToggle, zoomSel, fitBtn, csvInput, renderBtn, dropzone;
+let fileInput, sampleBtn, liveToggle, zoomSel, fitBtn, csvInput, renderBtn;
 let headerEl, leftHead, monthRow, dayRow, labelsEl, gridEl, todayEl, previewEl, colResizer;   // v56 追加
 
 // ===== CSV -> model =====
@@ -73,7 +74,7 @@ function buildModel(text){
     assignee: findHeaderIndex(['担当者','assignee','責任者'], header),
     status:   findHeaderIndex(['進行状況','status'], header),
     priority: findHeaderIndex(['優先度','priority'], header),
-    check:    findHeaderIndex(['check','チェック','中間','中間チェック'], header),    // 削除 v58
+    check:    findHeaderIndex(['check','チェック','中間','中間チェック'], header),    // v58
 
     // 追加 v60 タスクID / 後続
     taskno:   findHeaderIndex(['タスクno','taskno','task no','id','ID','タスクNo'], header),
@@ -192,7 +193,6 @@ function __tickLabel(d,mode){
 async function exportPNGAll() {
   // v57 追加 ヘッダー（.gantt-header）も含めるため .gantt-wrapper を丸ごと撮る
   const src = document.querySelector('.gantt-wrapper');
-  // onst src = document.querySelector('.gantt-body');    // 削除  v57
   if (!src) { alert('gantt body not found'); return; }
 
   // 1) 表示用DOMのクローンを作成（画面外に配置）
@@ -215,8 +215,6 @@ async function exportPNGAll() {
   const cLabels  = clone.querySelector('.task-labels');
   const cHeader  = clone.querySelector('.gantt-header');
 
-  // const cGrid   = clone.querySelector('.gantt-grid');    // v57 削除
-  // const cLabels = clone.querySelector('.task-labels');   // v57 削除 
   if (cGrid)   { cGrid.style.maxHeight = 'none'; cGrid.style.height = 'auto'; cGrid.style.overflow = 'visible'; }
   if (cLabels) { cLabels.style.maxHeight = 'none'; cLabels.style.height = 'auto'; cLabels.style.overflow = 'visible'; }
   if (cHeader) { cHeader.style.position = 'static'; } // v57 追加 sticky解除（撮影時に崩れやすいため）
@@ -228,7 +226,6 @@ async function exportPNGAll() {
   if (cDay)   cDay.style.transform   = 'none';
 
   // 4) “本当に必要な”描画サイズを確定（gridCanvasの幅も考慮）
-  // v57 削除 const w = clone.scrollWidth;
   const cCanvas = clone.querySelector('#gridCanvas');
   const w = Math.max(
     clone.scrollWidth,
@@ -238,11 +235,6 @@ async function exportPNGAll() {
 
   // bars/labels のどちらが高いかを見て、+ヘッダー高ぶん余裕を持たせる
   const cBars = clone.querySelector('#bars');
-
-  // const barsH   = cBars ? cBars.scrollHeight : 0;     // v57 削除
-  // const labelsH = cLabels ? cLabels.scrollHeight : 0; // v57 削除
-  // const headH   = 62; // .gantt-header相当            // v57 削除
-  // const h = Math.max(barsH, labelsH) + headH + 4;     // v57 削除
 
   // v57 新規
   const barsH   = cBars ? cBars.scrollHeight : 0;
@@ -272,7 +264,6 @@ async function exportPNGAll() {
   // 7) 後片付け
   document.body.removeChild(clone);
 }
-
 
 // expand/collapse helpers
 function anyExpanded(){
@@ -332,209 +323,18 @@ function attachScrollSync(){
     if(_syncingV) return;
     _syncingV=true;
     tl.scrollTop = gg.scrollTop;
-    // gh.scrollLeft = gg.scrollLeft; // 削除 v39 patch
     _syncingV=false;
   }, {passive:true});
 
-  // gg.addEventListener('scroll', ()=>{ gh.scrollLeft = gg.scrollLeft; }, {passive:true}); // 削除 v39 patch
 }
 
 function bindEvents(){
-
-  // toggle
-  const toggleAllBtn = document.getElementById('toggleAllBtn');
-  if(toggleAllBtn){
-    toggleAllBtn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const cats=[...document.querySelectorAll('#taskLabels .label.group')].map(el=>el.dataset.cat).filter(Boolean);
-      const allCollapsed = cats.length>0 && cats.every(c=> state.collapsedCats.has(c));
-      if(allCollapsed){
-        state.collapsedCats.clear();
-      } else {
-        state.collapsedCats=new Set(cats);
-      }
-      render();
-      updateToggleAllBtn();
-      fixBottomSync();
-    });
-  }
-
-  // 観点のみ：全観点を一括で展開/折りたたみ
-  const toggleSubsBtn = document.getElementById('toggleSubsBtn');
-  if (toggleSubsBtn) {
-    toggleSubsBtn.addEventListener('click', ()=>{
-      // 現在のモデルから全観点キーを列挙
-      const keys = [];
-      for (const g of state.model.groups) {
-        const seen = new Set();
-        for (const t of g.items) {
-          const subName = t.sub || '(なし)';
-          if (!seen.has(subName)) {
-            seen.add(subName);
-            keys.push(`${g.cat}::${subName}`);
-          }
-        }
-      }
-      // すでに全て折りたたみ済みなら → 全展開、それ以外は → 全折りたたみ
-      const allCollapsed = keys.length>0 && keys.every(k => state.collapsedSubs.has(k));
-      if (allCollapsed) {
-        state.collapsedSubs.clear();
-      } else {
-        keys.forEach(k => state.collapsedSubs.add(k));
-      }
-      render();
-      fixBottomSync();
-      updateGlobalButtons();
-    });
-  }
-
-  // タスクのみ：孫タスク行の一括表示/非表示
-  const toggleTasksBtn = document.getElementById('toggleTasksBtn');
-  if (toggleTasksBtn) {
-    toggleTasksBtn.addEventListener('click', ()=>{
-      state.hideTaskRows = !state.hideTaskRows;
-      render();
-      fixBottomSync();
-      updateGlobalButtons();
-    });
-  }
-
-  // modal
-  const previewBtn = document.getElementById('previewBtn');
-  const modalClose = document.getElementById('modalClose');
-  const backdrop   = document.getElementById('modalBackdrop');
-  const openModal = ()=>document.body.classList.add('modal-open');
-  const closeModal= ()=>document.body.classList.remove('modal-open');
-  if(previewBtn) previewBtn.addEventListener('click', openModal);
-  if(modalClose) modalClose.addEventListener('click', closeModal);
-  if(backdrop)   backdrop.addEventListener('click', closeModal);
-  window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
-
-  // file/drag
-  fileInput.addEventListener('change', async (e)=>{
-    try{
-      const file=e.target.files?.[0]; if(!file) return;
-      const txt=await file.text();
-      csvInput.value=txt; e.target.value='';
-      renderCsvPreview(txt);
-      generate();
-    }catch(err){ console.error(err); alert('CSV読み込み失敗: '+(err.message||err)); }
-  });
-  ['dragenter','dragover'].forEach(ev=> dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.add('drag'); }));
-  ['dragleave','drop'  ].forEach(ev=> dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.remove('drag'); }));
-  dropzone.addEventListener('drop', async (e)=>{
-    try{
-      const file=e.dataTransfer?.files?.[0]; if(!file) return;
-      const txt=await file.text();
-      csvInput.value=txt;
-      renderCsvPreview(txt);
-      generate();
-    }catch(err){ console.error(err); alert('CSVドロップ失敗: '+(err.message||err)); }
-  });
-
-  renderBtn.addEventListener('click', ()=>generate());
-
-  // 拡大
-  zoomSel.addEventListener('change', ()=>{
-    if(state.model.tasks.length){
-      setZoom(zoomSel.value);
-      render();
-      fixBottomSync();
-    }
-  });
-
-  // 幅フィット
-  fitBtn.addEventListener('click', ()=>{
-    if(!state.model.tasks.length) return;
-    const containerWidth = document.querySelector('.gantt-grid').clientWidth || 800;
-    const totalDays = daysBetween(state.model.min, state.model.max);
-    state.model.dayWidth = Math.max(4, Math.round(containerWidth / totalDays));
-    render();
-    fixBottomSync();
-  });
-
-  // サンプルCSV読込み
-  sampleBtn.addEventListener('click', ()=>{
-    const s=sampleCSV();
-    csvInput.value=s;
-    renderCsvPreview(s);
-    generate();
-  });
-
-  // v54 PNG出力ボタン
-  const pngBtn = document.getElementById('pngBtn');
-  if (pngBtn) pngBtn.addEventListener('click', exportPNGAll);
-  
-  // v43 label click toggle（カテゴリ & 観点）
-  document.getElementById('taskLabels').addEventListener('click', (e)=>{
-    const elCat = e.target.closest('.label.group');
-    if (elCat) {
-      const cat = elCat.dataset.cat || elCat.textContent.trim();
-      if (state.collapsedCats.has(cat)) state.collapsedCats.delete(cat); else state.collapsedCats.add(cat);
-      render();
-      updateToggleAllBtn();
-      fixBottomSync();
-      return;
-    }
-    const elSub = e.target.closest('.label.subgroup');
-    if (elSub) {
-      const key = elSub.dataset.key;
-      if (state.collapsedSubs.has(key)) state.collapsedSubs.delete(key); else state.collapsedSubs.add(key);
-      render();
-      fixBottomSync();
-      updateGlobalButtons();   // 追記 v44
-    }
-  });
-
   // header follow width changes
-  new ResizeObserver(()=>{ renderHeader(daysBetween(state.model.min, state.model.max), 80); }).observe(document.getElementById('taskLabels'));
-  window.addEventListener('resize', ()=>{ fixBottomSync(); }, {passive:true});
-
-  // v56 新規 ====== 列幅リサイズ（ドラッグ） ======
-  if (colResizer) {
-    let startX = 0, startW = 0, dragging = false;
-    const rootStyle = document.documentElement.style;
-
-    const minW = 260;  // 最小幅（お好みで調整）
-    const maxW = 720;  // 最大幅（お好みで調整）
-
-    const onMove = (e)=>{
-      if (!dragging) return;
-      const clientX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-      const dx = clientX - startX;
-      let w = Math.max(minW, Math.min(maxW, startW + dx));
-      rootStyle.setProperty('--labels-w', w + 'px');
-      // ヘッダは ResizeObserver で追従するが、下端同期は明示で
-      fixBottomSync();
-    };
-    const onUp = ()=>{
-      if (!dragging) return;
-      dragging = false;
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-      document.removeEventListener('touchmove', onMove);
-      document.removeEventListener('touchend', onUp);
-      document.body.style.userSelect = '';
-      document.body.style.cursor = '';
-    };
-    const onDown = (e)=>{
-      dragging = true;
-      startX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-      startW = document.getElementById('taskLabels').offsetWidth;
-      document.addEventListener('mousemove', onMove, {passive:false});
-      document.addEventListener('mouseup', onUp, {passive:true});
-      document.addEventListener('touchmove', onMove, {passive:false});
-      document.addEventListener('touchend', onUp, {passive:true});
-      document.body.style.userSelect = 'none';
-      document.body.style.cursor = 'col-resize';
-      e.preventDefault();
-    };
-    colResizer.addEventListener('mousedown', onDown);
-    colResizer.addEventListener('touchstart', onDown, {passive:false});
-  }
+  new ResizeObserver(()=>{
+    renderHeader(daysBetween(state.model.min, state.model.max), 80);
+  }).observe(document.getElementById('taskLabels'));
 
 }
-
 
 function generate(){
   try{
@@ -559,6 +359,140 @@ function sampleCSV(){
   ].join('\n');
 }
 
+// v63 ===== 画面イベント関数 =====
+// 日表示・週表示・月表示のズームイベント
+export function onZoomChange() { setZoom(zoomSel.value); render(); fixBottomSync(); }
+// モーダル開閉
+export function openModal(){ document.body.classList.add('modal-open'); }
+export function closeModal(){ document.body.classList.remove('modal-open'); }
+export function onModalCloseClick(){ closeModal(); }
+export function onBackdropClick(){ closeModal(); }
+export function onEscKeydown(e){ if(e.key==='Escape') closeModal(); }
+
+// 描画
+export function onRenderClick(){ generate(); }
+// プレビュー
+export function onPreviewClick(){
+  try {
+    renderCsvPreview((csvInput && csvInput.value) ? csvInput.value : '');
+  } catch(e){ console.warn('renderCsvPreview failed:', e); }
+  openModal();
+}
+// CSV読込み
+export function onFileInputChange() {
+  const fileInput = document.getElementById('fileInput');
+  const csvInput  = document.getElementById('csvInput');
+  const f = fileInput?.files?.[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => { if (csvInput) csvInput.value = String(reader.result || ''); generate(); };
+  reader.readAsText(f);
+}
+// 子タスク・孫タスク開閉
+export function onLabelsClick(ev){
+  const g = ev.target.closest?.('.label.group');
+  if (g) {
+    const cat = g.dataset.cat;
+    if (state.collapsedCats.has(cat)) state.collapsedCats.delete(cat);
+    else state.collapsedCats.add(cat);
+    render(); return;
+  }
+  const s = ev.target.closest?.('.label.subgroup');
+  if (s) {
+    const key = s.dataset.key;
+    if (state.collapsedSubs.has(key)) state.collapsedSubs.delete(key);
+    else state.collapsedSubs.add(key);
+    render(); return;
+  }
+}
+// PNG出力
+export async function onPngClick(){ if (exportPNGAll) await exportPNGAll(); }
+export function onWindowResize(){ fixBottomSync(); }
+
+// 幅フィット
+export function onFitClick(){
+  if (!state.model.tasks.length) return;
+  const grid = document.getElementById('ganttGrid');
+  //const containerWidth = document.querySelector('.gantt-grid').clientWidth || 800;
+  const containerWidth = (grid && grid.clientWidth) ? grid.clientWidth : 800;
+  const totalDays = daysBetween(state.model.min, state.model.max);
+  state.model.dayWidth = Math.max(4, Math.round(containerWidth / totalDays));
+  render();
+  fixBottomSync();
+}
+
+// サンプルCSV読込み
+export function onSampleClick(){
+  const s = sampleCSV();
+  csvInput.value = s;
+  renderCsvPreview(s);
+  generate();
+}
+
+// 列幅リサイズ
+export function onColResizerMouseDown(e){
+  const labels = document.getElementById('taskLabels');
+  if (!labels) return;
+  let startX = 0, startW = 0, dragging = false;
+  const rootStyle = document.documentElement.style;
+  const minW = 260, maxW = 720;
+
+  const onMove = (ev)=>{
+    if (!dragging) return;
+    const clientX = (ev.touches && ev.touches[0]) ? ev.touches[0].clientX : ev.clientX;
+    const dx = clientX - startX;
+    let w = Math.max(minW, Math.min(maxW, startW + dx));
+    rootStyle.setProperty('--labels-w', w + 'px');
+    fixBottomSync();
+  };
+  const onUp = ()=>{
+    if (!dragging) return;
+    dragging = false;
+    document.removeEventListener('mousemove', onMove);
+    document.removeEventListener('mouseup', onUp);
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onUp);
+    document.body.style.userSelect = '';
+    document.body.style.cursor = '';
+  };
+  dragging = true;
+  startX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+  startW = labels.offsetWidth;
+  document.addEventListener('mousemove', onMove, {passive:false});
+  document.addEventListener('mouseup', onUp, {passive:true});
+  document.addEventListener('touchmove', onMove, {passive:false});
+  document.addEventListener('touchend', onUp, {passive:true});
+  document.body.style.userSelect = 'none';
+  document.body.style.cursor = 'col-resize';
+  e.preventDefault();
+}
+
+// WBS側のトグル操作
+export function onToggleAllClick(e){
+  e?.stopPropagation?.();
+  const cats=[...document.querySelectorAll('#taskLabels .label.group')].map(el=>el.dataset.cat).filter(Boolean);
+  const allCollapsed = cats.length>0 && cats.every(c=> state.collapsedCats.has(c));
+  if(allCollapsed){ state.collapsedCats.clear(); } else { state.collapsedCats=new Set(cats); }
+  render(); updateToggleAllBtn(); fixBottomSync();
+}
+export function onToggleSubsClick(){
+  const keys = [];
+  for (const g of state.model.groups) {
+    const seen = new Set();
+    for (const t of g.items) {
+      const subName = t.sub || '(なし)';
+      if (!seen.has(subName)) { seen.add(subName); keys.push(`${g.cat}::${subName}`); }
+    }
+  }
+  const allCollapsed = keys.length>0 && keys.every(k => state.collapsedSubs.has(k));
+  if (allCollapsed) state.collapsedSubs.clear(); else keys.forEach(k => state.collapsedSubs.add(k));
+  render(); fixBottomSync(); updateGlobalButtons();
+}
+export function onToggleTasksClick(){
+  state.hideTaskRows = !state.hideTaskRows;
+  render(); fixBottomSync(); updateGlobalButtons();
+}
+
 window.addEventListener('DOMContentLoaded', ()=>{
   // refs
   fileInput = document.getElementById('fileInput');
@@ -568,7 +502,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
   fitBtn = document.getElementById('fitBtn');
   csvInput = document.getElementById('csvInput');
   renderBtn = document.getElementById('renderBtn');
-  dropzone = document.getElementById('dropzone');
   headerEl = document.getElementById('ganttHeader');
   leftHead = document.getElementById('leftHead');
   monthRow = document.getElementById('monthRow');
@@ -580,6 +513,16 @@ window.addEventListener('DOMContentLoaded', ()=>{
   previewEl = document.getElementById('csvPreview');
   bindEvents();
   attachScrollSync();
+  
+  // v63 イベントを初期化時に起動
+  initEvents({
+    onZoomChange, onRenderClick, onPreviewClick,
+    onFileInputChange, onLabelsClick, onSampleClick,
+    onColResizerMouseDown,
+    onToggleAllClick, onToggleSubsClick, onToggleTasksClick,
+    onModalCloseClick, onBackdropClick, onEscKeydown,
+    onPngClick, onWindowResize, onFitClick
+  });
 
   // modal closed at init
   document.body.classList.remove('modal-open');
