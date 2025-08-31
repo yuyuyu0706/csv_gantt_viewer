@@ -1,13 +1,34 @@
 // dom.js
 // @ts-check
 
-export const $  = (s)=>document.querySelector(s);
-export const $$ = (s)=>document.querySelectorAll(s);
+/**
+ * CSSセレクタに一致する最初の要素（なければ null）
+ * @template {Element} T
+ * @param {string} selector
+ * @returns {T|null}
+ */
+export const $  = (selector)=>document.querySelector(selector);
 
+/**
+ * CSSセレクタに一致する全要素の NodeList
+ * @template {Element} T
+ * @param {string} selector
+ * @returns {NodeListOf<T>}
+ */
+export const $$ = (selector)=>document.querySelectorAll(selector);
+
+/**
+ * 要素を作成（className と text は任意）
+ * @template {keyof HTMLElementTagNameMap} K
+ * @param {K} tag
+ * @param {string} [className]
+ * @param {string|number|null} [text]
+ * @returns {HTMLElementTagNameMap[K]}
+ */
 export function createEl(tag, className, text){
   const el = document.createElement(tag);
   if(className) el.className = className;
-  if(text != null) el.textContent = text;
+  if(text != null) el.textContent = String(text);
   return el;
 }
 
@@ -16,13 +37,13 @@ export function createEl(tag, className, text){
  * @template {Element} T
  * @param {string} selector
  * @param {ParentNode} [root=document]
- * @returns {T}
+ * @returns {T|null}
  */
 export function mustQuery(selector, root = document) {
   const el = root.querySelector(selector);
   if (!el) throw new Error(`Element not found: ${selector}`);
   // @ts-ignore - JSDocキャスト
-  return /** @type {T} */ (el);
+  return /** @type {T|null} */ (el);
 }
 
 /**
