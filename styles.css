@@ -1,0 +1,222 @@
+:root{
+  --bg:#ffffff; --panel:#f6fbf7; --text:#0f2d1f; --muted:#5f7a6b; --acc:#2e7d32; --grid:#dfe8e3;
+  --border:#d6e4db; --code-bg:#eef6f0; --today:#1b5e20;
+  --status-done:#bdbdbd; --status-not:#ffffff; --status-run:#66bb6a; --status-delay:#ffd54f; --status-not-border:#cfd8dc;
+  --row-h:28px; --bar-h:20px; --labels-w:400px; --cat-bar-h:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px/1.6 system-ui,Segoe UI,Roboto,Helvetica,Arial}
+
+/* Header */
+.app-header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(90deg,#e8f5e9,#f6fbf7);border-bottom:1px solid var(--border)}
+.app-header h1{margin:0;font-size:18px;color:#115c34}
+.actions{display:flex;gap:8px;align-items:center}
+button,select,.file-btn{background:#e2f2e8;color:#0f2d1f;border:1px solid var(--border);border-radius:10px;padding:8px 10px;cursor:pointer}
+.file-btn{position:relative;overflow:hidden}
+.file-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.toggle{display:flex;gap:6px;align-items:center;padding:4px 8px;border-radius:8px;background:#ecf7f0;border:1px solid var(--border)}
+
+/* Layout */
+.layout{padding:12px}
+.right{background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:12px}
+.right h2{margin:4px 0 8px 0;font-size:16px;color:#115c34}
+
+/* CSV Modal */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);backdrop-filter:blur(1px);display:none;z-index:40}
+.modal-panel{position:fixed;inset:6% auto auto 50%;transform:translateX(-50%);width:min(840px,92vw);max-height:82vh;overflow:auto;background:#fff;border:1px solid var(--border);border-radius:14px;padding:12px;display:none;z-index:41}
+.modal-open .modal-backdrop{display:block}
+.modal-open .modal-panel{display:block}
+.modal-close{position:sticky;top:0;margin-left:auto;border-radius:8px;border:1px solid var(--border);background:#fff;padding:4px 8px}
+textarea#csvInput{width:100%;height:220px;background:var(--code-bg);border:1px solid var(--border);border-radius:10px;padding:10px;font-family:ui-monospace,Consolas,monospace}
+.row{display:flex;gap:8px;align-items:center;margin:8px 0}
+.dropzone{flex:1;text-align:center;padding:8px;border:1px dashed #a5cbb1;border-radius:10px;color:#25674a;background:#f0faf3}
+.csv-preview{background:#ffffff;border:1px solid var(--border);border-radius:10px;padding:8px;max-height:220px;overflow:auto}
+.csv-preview table{border-collapse:collapse;width:100%}
+.csv-preview th,.csv-preview td{border:1px solid var(--border);padding:6px 8px;text-align:left}
+.csv-preview th{background:#e8f5e9}
+
+/* Gantt Header */
+.gantt-header{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--border);overflow:hidden}
+
+/* スケールは 1、左ヘッダーは 10 で最前面に */
+.gantt-header .months{position:relative;height:32px;display:block;overflow:hidden}
+.gantt-header .ticks{position:relative;height:30px;display:block;overflow:hidden;border-top:1px solid var(--border)}
+
+/* 左ヘッダーを前面に固定。背景で下のスケールを隠す */
+.left-header{
+  position:absolute;left:0;top:0;
+  display:grid;grid-template-columns:1fr 90px;align-items:end;
+  height:62px;padding:0 8px 4px 8px;
+  z-index:10;
+  background: var(--panel);   /* ← 重要：重なっても下を隠す */
+}
+
+.gantt-header .label{position:absolute;top:8px;transform:translateX(-50%);font-size:12px;color:#2a6648;white-space:nowrap}
+.gantt-header .vline{position:absolute;top:0;bottom:0;width:1px;background:var(--grid)}
+.left-header .lh-name{justify-self:start;color:#2a6648;font-size:12px}
+.left-header .lh-prio{justify-self:end;color:#2a6648;font-size:12px}
+
+/* Gantt Body：3カラム（タスク列 / 仕切り / チャート） */
+.gantt-body{
+  display:grid;
+  grid-template-columns: var(--labels-w) 8px 1fr; /* ★ 中央8pxがハンドル */
+  min-height:420px;max-height:70vh;overflow:hidden;
+  border:1px solid var(--border);border-radius:12px;background:#ffffff
+}
+
+.task-labels{border-right:1px solid var(--border);background:#fbfefc;overflow:auto;max-height:70vh;overscroll-behavior:contain}
+
+/* v56 ドラッグ用の仕切り */
+.col-resizer{
+  cursor: col-resize;
+  background: repeating-linear-gradient(90deg, #0000 0 6px, #dfe8e3 6px 7px); /* 薄いグリップ */
+}
+
+.task-labels .label{display:grid;grid-template-columns:1fr 90px;border-bottom:1px solid var(--border);padding:6px 8px;align-items:center;gap:8px;height:var(--row-h);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-labels .label.group{font-weight:700;background:#eef6f0;color:#144e35}
+.task-labels .label.subtask{padding-left:20px}
+.task-labels .prio{justify-self:end}
+.task-labels .prio.urgent{color:#d32f2f;font-weight:700}
+.task-labels .prio.high{font-weight:700}
+.task-labels .prio.mid{}
+.task-labels .prio.low{opacity:.9}
+
+/* Scrollable grid + inner canvas */
+.gantt-grid{position:relative;overflow:auto;background:#ffffff;max-height:70vh;overscroll-behavior:contain}
+.grid-canvas{position:relative;min-height:100%}
+.grid-canvas .vline{position:absolute;top:0;bottom:0;width:1px;background:var(--grid)}
+.grid-canvas .hline{position:absolute;left:0;right:0;height:1px;background:var(--grid)}
+.today-line{
+  position:absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;                /* 線の太さ */
+  z-index: 9999;             /* 進捗バーより前面にする */
+  background-color: red;     /* 線の色 */
+  background: var(--today);
+  opacity:.9
+ }
+.bars{position:relative}
+.bar{position:absolute;height:var(--bar-h);border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,.05), inset 0 1px 0 rgba(255,255,255,.5);display:flex;align-items:center;border:1px solid transparent}
+.bar .name{font-size:12px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#0b3b2a}
+.bar.cat{background:#424242;border-color:#424242;height:var(--cat-bar-h);border-radius:6px}
+
+/* Footer */
+.app-footer{padding:10px 14px;color:#5f7a6b;border-top:1px solid var(--border);background:#f6fbf7}
+
+/* 追加 v41 3階層目（観点→タスク）の表示 */
+.task-labels .label.subgroup{       /* 観点見出し */
+  padding-left: 14px;
+  background: #f4fbf6;
+  font-weight: 600;
+}
+
+/* 追加 v41 */
+.task-labels .label.task{           /* 観点配下のタスク */
+  padding-left: 36px;
+}
+
+/* v45 観点の青バー */
+.bar.subcat {
+  background: #2196f3;   /* 青色 */
+  border-color: #1976d2;
+  /* height: var(--cat-bar-h);*/  /* カテゴリバーと同じ高さ */
+  height: 8px;          /* 元より細く */
+  border-radius: 6px;   /* 角を少し丸く=6px 右端 ▶=0px */
+  /* clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 0 100%);   /* 右端を ▶ にする */  
+}
+
+/* === v47 タスクバーの外側に表示する日付ラベル === */
+.date-label{
+  position: absolute;
+  font-size: 11px;
+  font-weight: bold;         /* 太字化 */
+  line-height: 1;
+  color: var(--muted);
+  white-space: nowrap;
+  pointer-events: none;      /* UI操作を妨げない */
+  user-select: none;
+  z-index: 3;                /* バーより前面、今日線よりは下でもOKなら 3〜5 程度 */
+}
+.date-label.start{
+  transform: translate(-26px, -50%);  /* 左に10px、縦中央 */
+  text-align: right;
+}
+.date-label.end{
+  transform: translate(6px, -50%);   /* 右に6px、縦中央 */
+  text-align: left;
+}
+
+
+/* === v58 中間チェック（★MM/DD）=== */
+.check-label{
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 700;
+  color: #1B76C5;  /* 見やすい青 */
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  z-index: 6;     /* バーより前面、今日線より前に出したければ 10000 などに上げる */
+}
+
+/* === v51 左ラベル：マイルストーン行の装飾 === */
+.label.milestone{
+  padding-left: 14px;
+  background: #f4fbf6;
+  font-weight: 600;
+}
+
+/* === v51 ガント側：マイルストーンの「★ M/D」=== */
+.ms-star{
+  position: absolute;
+  transform: translateY(-50%);
+  font-weight: 700;
+  color: #1B76C5;      /* 青 */
+  font-size: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 6;          /* バーより前面、今日線よりも前にしたければ 8 などに */
+}
+
+/* === v57 改訂：v56: PNG出力用（クローン要素内だけに効かせる） === */
+.export-capture .gantt-header{
+  position: static !important;
+  z-index: auto !important;
+}
+.export-capture .gantt-body{
+  max-height:none !important;
+  height:auto !important;
+}
+.export-capture #taskLabels,
+.export-capture #ganttGrid{
+  max-height:none !important;
+  height:auto !important;
+  overflow:visible !important;
+}
+.export-capture .grid-canvas{
+  min-height:auto !important;
+}
+.export-capture .left-header{
+  /* 左ヘッダーがスケールの上に被っても見切れないように微オフセット（任意） */
+  padding-bottom: 6px;
+}
+
+/* v60 依存線 SVG レイヤ */
+.deps {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 5;
+  /* 日付ラベルやチェックラベルと重なる場合は調整 */
+}
+
+.deps path {
+  stroke: #444;
+  stroke-width: 1.4;
+  fill: none;
+  opacity: 0.85;
+}

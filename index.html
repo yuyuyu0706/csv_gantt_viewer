@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CSV to Gantt Viewer | v62</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22/>">
+</head>
+<body>
+  <header class="app-header">
+    <h1>CSV to Gantt Viewer</h1>
+    <div class="actions">
+      <button id="toggleAllBtn" title="すべて展開/折りたたみを切替">全て折りたたむ</button>
+
+      <button id="toggleSubsBtn"  title="観点（中レベル）を一括で展開/折りたたみ">観点のみ折りたたみ</button>
+      <!-- <button id="toggleTasksBtn" title="タスク（孫）を一括で表示/非表示">タスクのみ折りたたみ</button> -->
+  
+      <label class="file-btn">CSVを選択<input type="file" id="fileInput" accept=".csv,text/csv" /></label>
+      <button id="previewBtn" title="CSVのプレビューを表示">CSVのプレビュー</button>
+      <button id="sampleBtn">サンプル読込</button>
+      <label class="toggle"><input type="checkbox" id="liveToggle" checked />ライブプレビュー</label>
+      <select id="zoom" title="表示スケール">
+        <option value="day" selected>日表示</option>
+        <option value="week">週表示</option>
+        <option value="month">月表示</option>
+      </select>
+      <button id="fitBtn">幅フィット</button>
+      <button id="pngBtn">PNG出力</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="right">
+      <h2>ガントチャート</h2>
+      <div class="gantt-wrapper">
+        <div id="ganttHeader" class="gantt-header">
+          <div class="left-header" id="leftHead">
+            <span class="lh-name">カテゴリ / 観点</span>
+            <span class="lh-prio">優先度</span>
+          </div>
+          <div class="months" id="monthRow"></div>
+          <div class="ticks" id="dayRow"></div>
+        </div>
+        <div class="gantt-body">
+          <div id="taskLabels" class="task-labels"></div>
+          
+          <!-- v56 ドラッグ用ハンドル -->
+          <div id="colResizer" class="col-resizer" title="ドラッグで列幅を調整"></div>
+          <div id="ganttGrid" class="gantt-grid">
+
+            <div id="gridCanvas" class="grid-canvas">
+              <div class="grid-lines"></div>
+              <div id="todayLine" class="today-line" hidden></div>
+              <div id="bars" class="bars"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">検証中</footer>
+
+  <!-- CSV モーダル -->
+  <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true"></div>
+  <section class="left modal-panel" id="csvModal" role="dialog" aria-modal="true" aria-labelledby="csvTitle">
+    <button id="modalClose" class="modal-close" aria-label="閉じる">×</button>
+    <h2 id="csvTitle">CSV入力</h2>
+    <p class="hint">必須：<code>カテゴリ</code>, <code>Start</code>, <code>End</code>。任意：<code>観点</code>（子タスク）, <code>進行状況</code>（完了済み/開始前/進行中/遅延）, <code>優先度</code>（緊急/高/中/低）。</p>
+    <textarea id="csvInput"></textarea>
+    <div class="row">
+      <button id="renderBtn">チャート生成</button>
+      <span class="dropzone" id="dropzone">ここにCSVをDrop</span>
+    </div>
+    <h3>プレビュー</h3>
+    <div id="csvPreview" class="csv-preview" aria-live="polite"></div>
+  </section>
+
+  <!-- v61 -->
+  <script type="module" src="./main.js"></script>
+  <script src="./html2canvas.min.js"></script>
+</body>
+</html>
