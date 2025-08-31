@@ -1,4 +1,6 @@
 // headers.js
+// @ts-check
+
 // app.js の normHeaders / findHeaderIndex を移植:contentReference[oaicite:10]{index=10}
 export function normHeaders(r0){
   return r0.map(h =>

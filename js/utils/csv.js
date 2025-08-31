@@ -1,4 +1,6 @@
 // csv.js
+// @ts-check
+
 // 既存 app.js の parseCSV をそのまま移植:contentReference[oaicite:8]{index=8}
 export function parseCSV(text){
   const rows = []; let i=0, f='', row=[], q=false;

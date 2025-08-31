@@ -1,4 +1,6 @@
 // date.js
+// @ts-check
+
 // app.js の toDate / fmt / fmtMD / daysBetween を移植:contentReference[oaicite:9]{index=9}
 export function toDate(x){
   if(!x) return null;
