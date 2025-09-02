@@ -1,5 +1,15 @@
 // renderer.js — original behavior-preserving rendering split (ESM)
 // @ts-check
+
+/**
+ * Gantt Chart のレンダリングモジュール
+ * 
+ * 主な機能:
+ * - state.model のデータをもとに、行とバーを描画
+ * - 依存線・マイルストーン・ラベルを生成
+ * - 今日線（イナズマ線）を描画
+ */
+ 
 import { state } from './state.js';
 import { toDate } from './utils/date.js'; // 既存と整合
 import { ROW_H, BAR_H } from './constants.js';
@@ -7,7 +17,12 @@ import { fmtMD, daysBetween } from './utils/date.js';
 import { drawDependencies } from './deps.js';
 import { updateToggleAllBtn, updateGlobalButtons } from './toggles.js';
 
-// ---- helpers（元の app.js 相当。window に無ければフォールバック実装）----
+/**
+ * 優先度テキストからCSSクラスとラベル文字を返すヘルパー
+ * @param {string} p 優先度文字列（例: "高", "緊急"）
+ * @returns {[string, string]} CSSクラス名と表示テキスト
+ */
+ 
 const prioClassText = (window.prioClassText) ? window.prioClassText : function(p){
   const v=(p||'').trim();
   if(v==='緊急') return ['urgent','緊急'];
@@ -16,6 +31,13 @@ const prioClassText = (window.prioClassText) ? window.prioClassText : function(p
   if(v==='低') return ['low','低'];
   return ['',''];
 };
+
+/**
+ * ステータスからバーの色コードを返すヘルパー
+ * @param {string} s ステータス文字列
+ * @returns {string} カラーコード
+ */
+ 
 const statusColor = (window.statusColor) ? window.statusColor : function(s){
   const v=String(s||'').replace(/[　]/g,' ').trim();
   if(v==='完了済み') return '#bdbdbd';
@@ -24,6 +46,17 @@ const statusColor = (window.statusColor) ? window.statusColor : function(s){
   if(v==='遅延') return '#ffd54f';
   return '#66bb6a';
 };
+
+/**
+ * バーの開始・終了日ラベルを追加するヘルパー
+ * @param {HTMLElement} containerEl バーのコンテナ要素
+ * @param {number} startX 開始位置X座標
+ * @param {number} endX 終了位置X座標
+ * @param {number} midY バー中央のY座標
+ * @param {Date} startDate 開始日
+ * @param {Date} endDate 終了日
+ */
+ 
 const appendDateLabels = (window.appendDateLabels) ? window.appendDateLabels : function(containerEl, startX, endX, midY, startDate, endDate) {
   const s = document.createElement('div');
   s.className = 'date-label start';
@@ -39,6 +72,14 @@ const appendDateLabels = (window.appendDateLabels) ? window.appendDateLabels : f
   e.style.top  = midY + 'px';
   containerEl.appendChild(e);
 };
+
+/**
+ * 開始日→終了日→名前の順に安定ソートする比較関数
+ * @param {object} a タスクオブジェクト
+ * @param {object} b タスクオブジェクト
+ * @returns {number} 比較結果
+ */
+ 
 const cmpByStartThenName = (window.cmpByStartThenName) ? window.cmpByStartThenName : function(a, b){
   const ax = a?.start ? a.start.getTime() : Infinity;
   const bx = b?.start ? b.start.getTime() : Infinity;
@@ -50,30 +91,66 @@ const cmpByStartThenName = (window.cmpByStartThenName) ? window.cmpByStartThenNa
   const bn = String(b?.task || b?.sub || b?.name || '');
   return an.localeCompare(bn, 'ja');
 };
-const __isBoundary = (window.__isBoundary) ? window.__isBoundary : function(d,mode){
+
+/**
+ * 境界線を引くかどうかを判定する
+ * @param {Date} d 日付
+ * @param {'day'|'week'|'month'} mode ズームモード
+ * @returns {boolean} true: 境界に該当
+ */
+ const __isBoundary = (window.__isBoundary) ? window.__isBoundary : function(d,mode){
   if(mode==='day')   return true;
   if(mode==='week')  return d.getUTCDay()===0;
   if(mode==='month') return d.getUTCDate()===1;
   return true;
 };
 
-// === 今日線スナップ用ヘルパ（孫タスクの未完了かつ End が今日より前） =========
+/**
+ * 日付をUTC基準でその日の00:00に丸める
+ * @param {Date} d 入力日付
+ * @returns {Date} 丸められた日付
+ */
 function _startOfDayUTC(d) {
   // 本プロジェクトは getUTC* を用いた日付扱いのため、UTC基準で0時に丸める
   const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
   return x;
 }
+
+/**
+ * タスク番号から階層深度を返す
+ * @param {string} taskNo タスク番号 (例: "1.2.3")
+ * @returns {number} 階層深度
+ */
 function _depthOfTaskNo(taskNo) {
   const s = String(taskNo || '').trim();
   if (!s) return 0;
   return s.split('.').filter(Boolean).length;
 }
+
+/**
+ * 孫タスクかどうか判定する
+ * @param {object} t タスクオブジェクト
+ * @returns {boolean} 孫タスクならtrue
+ */
 function _isGrandchildTask(t) {
   return _depthOfTaskNo(t.taskNo) === 3;
 }
+
+/**
+ * ステータスが「完了済み」か判定する
+ * @param {object} t タスクオブジェクト
+ * @returns {boolean} 完了済みならtrue
+ */
 function _isDoneStatus(t) {
   return String(t.status || '').replace(/[　]/g,' ').trim() === '完了済み';
 }
+
+/**
+ * 孫タスクのうち未完了かつ終了日が今日より前の最も近い日を返す
+ * @param {Array<object>} tasks タスク配列
+ * @param {Date} todayUTC0 今日(UTC)の00:00
+ * @returns {Date|null} スナップ対象の日付
+ */
 function findSnapDateForTodayLine(tasks, todayUTC0) {
   // 対象：孫タスク && 未完了 && End < today
   const cands = tasks.filter(t =>
@@ -83,7 +160,20 @@ function findSnapDateForTodayLine(tasks, todayUTC0) {
   return cands.reduce((best, cur) => (best === null || cur.end > best ? cur.end : best), null);
 }
 
-// 参照取得（元はグローバル変数だったもの）
+/**
+ * DOM参照をまとめて取得
+ * @returns {{
+ *   labelsEl: HTMLElement|null,
+ *   gridEl: HTMLElement|null,
+ *   monthRow: HTMLElement|null,
+ *   dayRow: HTMLElement|null,
+ *   leftHead: HTMLElement|null,
+ *   headerEl: HTMLElement|null,
+ *   zoomSel: HTMLSelectElement|null,
+ *   canvas: HTMLElement|null,
+ *   bars: HTMLElement|null
+ * }}
+ */
 function _refs(){
   return {
     labelsEl: document.getElementById('taskLabels'),
@@ -98,7 +188,12 @@ function _refs(){
   };
 }
 
-// ===================== 元の render() =====================
+/**
+ * メイン描画関数
+ *
+ * 行構造の生成、ラベル、バー、依存線、今日線イナズマをすべて描画する。
+ * @returns {void}
+ */
 export function render(){
   const { labelsEl, canvas } = _refs();
 
@@ -462,19 +557,6 @@ export function render(){
   updateToggleAllBtn();
   updateGlobalButtons();
 
-/*
-  // 今日線
-  const today=new Date();
-  const tz=new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
-  if(tz>=state.model.min && tz<=state.model.max){
-    const off=Math.floor((tz-state.model.min)/86400000) * state.model.dayWidth;
-    todayEl.hidden=false; todayEl.style.left=off+'px';
-    todayEl.style.height=contentH+'px';
-  } else {
-    todayEl.hidden=true;
-  }
-*/
-
   // === 今日“イナズマ線”（End の M/D ラベル左端へ“食い込む”） ======================
   // 0) 事前準備（ターゲット整列） — ※ __todayUTC0 は上部で一度だけ定義済みを再利用
   const targets = (__zigTargets || [])
@@ -558,7 +640,12 @@ export function render(){
   if (headerEl) headerEl.scrollLeft = 0;
 }
 
-// ===================== 元の renderHeader() =====================
+/**
+ * ヘッダー部（日付ラベルや縦線）の描画
+ * @param {number} totalDays 全体の日数
+ * @param {number} RIGHT_PAD 右側パディング幅
+ * @returns {void}
+ */
 export function renderHeader(totalDays, RIGHT_PAD){
   const { monthRow, dayRow, leftHead, gridEl } = _refs();
 
@@ -664,7 +751,10 @@ export function renderHeader(totalDays, RIGHT_PAD){
   sync();
 }
 
-// ===================== 元の fixBottomSync() =====================
+/**
+ * ラベル部分とバー部分の高さを同期
+ * @returns {void}
+ */
 export function fixBottomSync(){
   try{
     const labels = document.getElementById('taskLabels');
@@ -684,7 +774,10 @@ export function fixBottomSync(){
   }catch(e){ console.error(e); }
 }
 
-// 初期同期（render() から呼ぶ小ヘルパ）
+/**
+ * ヘッダー位置をスクロール位置と同期
+ * @returns {void}
+ */
 function syncHeaderToGrid(){
   const { gridEl, monthRow, dayRow } = _refs();
   const x = gridEl.scrollLeft || 0;
