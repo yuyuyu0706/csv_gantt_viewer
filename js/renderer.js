@@ -1,5 +1,7 @@
 // renderer.js — original behavior-preserving rendering split (ESM)
+// @ts-check
 import { state } from './state.js';
+import { toDate } from './utils/date.js'; // 既存と整合
 import { ROW_H, BAR_H } from './constants.js';
 import { fmtMD, daysBetween } from './utils/date.js';
 import { drawDependencies } from './deps.js';
@@ -54,6 +56,32 @@ const __isBoundary = (window.__isBoundary) ? window.__isBoundary : function(d,mo
   if(mode==='month') return d.getUTCDate()===1;
   return true;
 };
+
+// === 今日線スナップ用ヘルパ（孫タスクの未完了かつ End が今日より前） =========
+function _startOfDayUTC(d) {
+  // 本プロジェクトは getUTC* を用いた日付扱いのため、UTC基準で0時に丸める
+  const x = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  return x;
+}
+function _depthOfTaskNo(taskNo) {
+  const s = String(taskNo || '').trim();
+  if (!s) return 0;
+  return s.split('.').filter(Boolean).length;
+}
+function _isGrandchildTask(t) {
+  return _depthOfTaskNo(t.taskNo) === 3;
+}
+function _isDoneStatus(t) {
+  return String(t.status || '').replace(/[　]/g,' ').trim() === '完了済み';
+}
+function findSnapDateForTodayLine(tasks, todayUTC0) {
+  // 対象：孫タスク && 未完了 && End < today
+  const cands = tasks.filter(t =>
+    _isGrandchildTask(t) && !_isDoneStatus(t) && (t.end instanceof Date) && (t.end < todayUTC0)
+  );
+  if (!cands.length) return null;
+  return cands.reduce((best, cur) => (best === null || cur.end > best ? cur.end : best), null);
+}
 
 // 参照取得（元はグローバル変数だったもの）
 function _refs(){
@@ -247,6 +275,11 @@ export function render(){
   const Y_PAD = Math.floor((ROW_H - BAR_H)/2);
   const catH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cat-bar-h')) || 12;
 
+  // === イナズマ線用：今日(UTC 0時)と候補格納 ===
+  const __today = new Date();
+  const __todayUTC0 = new Date(Date.UTC(__today.getUTCFullYear(), __today.getUTCMonth(), __today.getUTCDate()));
+  const __zigTargets = [];  // {rowTop, rowBottom, midY, endX}
+
   for(const r of rows){
     if(r.type==='group'){
       if (r.cat === 'マイルストーン') { rowIndex++; continue; }
@@ -387,6 +420,22 @@ export function render(){
     bars.appendChild(startLbl);
     bars.appendChild(endLbl);
 
+    // --- イナズマ対象：孫タスク(= t.task あり) & 未完了 & End<今日 の End「ラベル」を記録 ---
+    const isLeaf = (r.type === 'task' || r.type === 'subtask');
+    if (isLeaf) {
+      const st = String(t.status || '').replace(/[　]/g,' ').trim();
+      if (st !== '完了済み' && (t.end instanceof Date)) {
+        // 今日(UTC0)より前かは後段でまとめて判定する。ここではラベル要素を保持。
+        __zigTargets.push({
+          rowTop: (rowIndex * ROW_H),
+          rowBottom: (rowIndex * ROW_H) + ROW_H,
+          midY: barTop + ((parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || BAR_H) / 2),
+          endLbl,
+          endDate: t.end,
+        });
+      }
+    }
+
     // 中間チェック ★M/D
     if (t.check instanceof Date) {
       const checkDaysFromMin = Math.floor((t.check - state.model.min)/86400000);
@@ -413,6 +462,7 @@ export function render(){
   updateToggleAllBtn();
   updateGlobalButtons();
 
+/*
   // 今日線
   const today=new Date();
   const tz=new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
@@ -423,6 +473,85 @@ export function render(){
   } else {
     todayEl.hidden=true;
   }
+*/
+
+  // === 今日“イナズマ線”（End の M/D ラベル左端へ“食い込む”） ======================
+  // 0) 事前準備（ターゲット整列） — ※ __todayUTC0 は上部で一度だけ定義済みを再利用
+  const targets = (__zigTargets || [])
+    .filter(x => (x.endDate instanceof Date) && x.endDate < __todayUTC0)
+    .sort((a,b)=> a.rowTop - b.rowTop);
+
+  // 1) 今日の X（表示範囲外なら描かない）
+  const todayDaysFromMin = Math.floor((__todayUTC0 - state.model.min)/86400000);
+  const todayX = todayDaysFromMin * state.model.dayWidth;
+  if (todayX < 0 || todayX > canvas.offsetWidth) {
+    todayEl.hidden = true;
+  }
+
+  // 2) 既存縦線は隠す（重複を避ける）
+  if (todayEl) todayEl.hidden = true;
+
+  // 3) 旧イナズマを消去 → 新規 SVG 追加（ラベルが上に出るよう z-index を低めに）
+  let lightning = canvas.querySelector('#todayLightning');
+  if (lightning) lightning.remove();
+  lightning = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  lightning.setAttribute('id','todayLightning');
+  lightning.setAttribute('width','100%');
+  lightning.setAttribute('height', contentH + 'px');
+  lightning.style.position='absolute';
+  lightning.style.left='0'; lightning.style.top='0';
+  lightning.style.pointerEvents='none';
+  lightning.style.overflow='visible';
+  lightning.style.zIndex = '1';   // ← ラベルより下
+  bars.appendChild(lightning);
+
+  // 4) ベジェで“なめらか”に食い込むパスを構築
+  //    縦に降りて、対象行では： todayX → (行上端+R) → Q(丸め) → [labelLeftX+bite] → Q → (行下端-R) → todayX
+  const R = 8;         // カーブ半径
+  const TOUCH_GAP = 1;  // ラベル“手前”で止めるギャップ(px)
+  const barsRect = bars.getBoundingClientRect();
+  const parts = [];
+  let cursorY = 0;
+  parts.push(`M ${Math.round(todayX)} ${0}`);
+
+  for (const seg of targets) {
+    const topY = Math.max(0, seg.rowTop);
+    const botY = Math.min(contentH, seg.rowBottom);
+    if (cursorY < topY) {
+      // 対象行の直前まで縦に
+      parts.push(`L ${Math.round(todayX)} ${Math.round(topY + Math.min(R, (botY-topY)/2))}`);
+    }
+
+    // ラベル右端（bars内相対X）を測る
+    const lblRect = seg.endLbl.getBoundingClientRect();
+    const labelRightX = (lblRect.right - barsRect.left);
+    // 食い込み位置：ラベル右端“直外側”でピタッと止める（重なりなし）
+    //  ※todayX より右へ出ないよう軽くクランプ
+    const touchX = Math.max(0, Math.min(todayX - 1, labelRightX + TOUCH_GAP));
+    const midY  = Math.round(seg.midY);
+    
+    // Qベジェで滑らかに左へ → さらに戻る
+    //  todayX, topY+R  →  (CP: todayX, midY)  →  (touchX, midY)
+    parts.push(`Q ${Math.round(todayX)} ${midY} ${Math.round(touchX)} ${midY}`);
+    //  (biteX, midY)   →  (CP: todayX, midY)  →  (todayX, botY-R)
+    parts.push(`Q ${Math.round(todayX)} ${midY} ${Math.round(todayX)} ${Math.round(botY - Math.min(R, (botY-topY)/2))}`);
+
+    cursorY = botY;
+  }
+  if (cursorY < contentH) {
+    parts.push(`L ${Math.round(todayX)} ${Math.round(contentH)}`);
+  }
+
+  // 5) path を描画（太めの濃いピンク＋丸端/丸継ぎ＋高精度レンダリング）
+  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d', parts.join(' '));
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', '#d81b60');         // ← 濃いピンク
+  path.setAttribute('stroke-width', '3');         // ← もう少し太く
+  path.setAttribute('stroke-linecap', 'round');   // ← 丸端
+  path.setAttribute('stroke-linejoin', 'round');  // ← 丸継ぎ
+  path.setAttribute('shape-rendering', 'geometricPrecision');
+  lightning.appendChild(path);
 
   // transform 同期に一本化するためゼロ固定
   const headerEl = _refs().headerEl;
