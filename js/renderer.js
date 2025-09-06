@@ -660,7 +660,8 @@ export function render(){
 
     // 中間チェック ★M/D
     if (t.check instanceof Date) {
-      const checkDaysFromMin = Math.floor((t.check - min)/86400000);
+//      const checkDaysFromMin = Math.floor((t.check - min)/86400000);
+      const checkDaysFromMin = Math.floor((t.check.getTime() - min.getTime())/86400000);
       const checkX = checkDaysFromMin * dayWidth;
       const cx = Math.max(left + 0, Math.min(left + bw, checkX));
       const cy = barTop + (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || BAR_H)/2 + 15;
