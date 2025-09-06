@@ -12,7 +12,7 @@
  * @property {string=} status
  * @property {string=} priority
  * @property {string=} taskNo
- * /
+ */
 
 /**
  * @typedef {{type:'group',    cat:string, items: TaskItem[]}}    GroupRow
@@ -147,7 +147,7 @@ function _startOfDayUTC(d) {
 
 /**
  * タスク番号から階層深度を返す
- * @param {string} taskNo タスク番号 (例: "1.2.3")
+ * @param {string|undefined} taskNo タスク番号 (例: "1.2.3")
  * @returns {number} 階層深度
  */
 function _depthOfTaskNo(taskNo) {
@@ -186,7 +186,15 @@ function findSnapDateForTodayLine(tasks, todayUTC0) {
     _isGrandchildTask(t) && !_isDoneStatus(t) && (t.end instanceof Date) && (t.end < todayUTC0)
   );
   if (!cands.length) return null;
-  return cands.reduce((best, cur) => (best === null || cur.end > best ? cur.end : best), null);
+//  return cands.reduce((best, cur) => (best === null || cur.end > best ? cur.end : best), null);
+
+  /** @type {Date|null} */
+  let best = null;
+  for (const cur of cands) {
+    // cur.end は instanceof Date をフィルタ済み
+    if (best === null || cur.end > best) best = cur.end;
+  }
+  return best;
 }
 
 /**
