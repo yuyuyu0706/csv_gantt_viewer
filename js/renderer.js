@@ -237,14 +237,16 @@ export function render(){
   const rows=[];
 
   for(const g of state.model.groups){
-    rows.push({type:'group', cat:g.cat, items:g.items});
+//    rows.push({type:'group', cat:g.cat, items:g.items});
+    rows.push(/** @type {Row} */ ({type:'group', cat:g.cat, items:g.items}));
     if (state.collapsedCats.has(g.cat)) continue;
 
     // v52: マイルストーンカテゴリは特別扱い
     if (g.cat === 'マイルストーン') {
       for (const t of g.items) {
         const title = t.sub || t.task || t.name || '';
-        rows.push({ type:'milestone', cat:g.cat, item:t, displayName:title });
+//        rows.push({ type:'milestone', cat:g.cat, item:t, displayName:title });
+        rows.push(/** @type {Row} */ {type:'milestone', cat:g.cat, item:t, displayName:title });
       }
       continue;
     }
@@ -282,7 +284,8 @@ export function render(){
       for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
 
       // 観点見出し行
-      rows.push({ type:'subgroup', cat:g.cat, sub:subName, key, items });
+//      rows.push({ type:'subgroup', cat:g.cat, sub:subName, key, items });
+      rows.push(/** @type {Row} */ { type:'subgroup', cat:g.cat, sub:subName, key, items });
 
       // 折りたたみ中なら子行なし
       if (state.collapsedSubs.has(key)) continue;
@@ -293,15 +296,18 @@ export function render(){
       if (withTask) {
         if (!state.hideTaskRows) {
           for (const t of tasksInSub) {
-            rows.push({ type:'task', cat:g.cat, item:t, displayName:t.task });
+//            rows.push({ type:'task', cat:g.cat, item:t, displayName:t.task });
+            rows.push(/** @type {Row} */ { type:'task', cat:g.cat, item:t, displayName:t.task });
           }
         }
         for (const t of plainSub) {
-          rows.push({ type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
+//          rows.push({ type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
+          rows.push(/** @type {Row} */ { type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
         }
       } else {
         for (const t of plainSub) {
-          rows.push({ type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
+//          rows.push({ type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
+          rows.push(/** @type {Row} */ { type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
         }
       }
     }
