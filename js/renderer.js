@@ -212,7 +212,7 @@ function _refs(){
     dayRow:   /** @type {HTMLElement|null} */ (document.getElementById('dayRow')),
     leftHead: /** @type {HTMLElement|null} */ (document.getElementById('leftHead')),
     headerEl: /** @type {HTMLElement|null} */ (document.getElementById('ganttHeader')),
-    zoomSel:  /** @type {HTMLElement|null} */ (document.getElementById('zoom')),
+    zoomSel:  /** @type {HTMLSelectElement|null} */ (document.getElementById('zoom')),
     canvas:   /** @type {HTMLElement|null} */ (document.getElementById('gridCanvas')),
     bars:     /** @type {HTMLElement|null} */ (document.getElementById('bars')),
     todayEl:  /** @type {HTMLElement|null} */ (document.getElementById('todayLine')),
