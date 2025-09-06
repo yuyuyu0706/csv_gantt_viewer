@@ -906,7 +906,8 @@ export function fixBottomSync(){
       spacer.id = 'bottomSpacer';
       bars.appendChild(spacer);
     }
-    if (!(spacer instanceof HTMLElement)) return;
+//    if (!(spacer instanceof HTMLElement)) return;
+    if (!spacer) return;
     const need = Math.max(0, labels.scrollHeight - bars.scrollHeight);
     spacer.style.height = need + 'px';
   }catch(e){ console.error(e); }
