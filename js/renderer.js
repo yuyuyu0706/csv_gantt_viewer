@@ -706,7 +706,8 @@ export function renderHeader(totalDays, RIGHT_PAD){
   // ローカル変数を定義
   const min = /** @type {Date} */ (state.model.min);
   const dayWidth = /** @type {number} */ (state.model.dayWidth);
-  
+  const grid = /** @type {GridWithSync} */ (gridEl);
+
   // ラベル列ぶんだけ押し出す
   const spacerW = document.getElementById('taskLabels').offsetWidth
       || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--labels-w')) || 360;
@@ -715,9 +716,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
   dayRow.style.marginLeft   = spacerW + 'px';
 
   // 可視幅を本体に合わせる
-  /** @type {GridWithSync} */
-  const grid = /** @type {GridWithSync} */ (gridEl);
-
   const w = grid ? grid.scrollWidth : 0;
   if(w){
     monthRow.style.width = w + 'px';
@@ -798,7 +796,8 @@ export function renderHeader(totalDays, RIGHT_PAD){
   // ヘッダー横スクロール同期（translateXで追従）
   /** @type {() => void} */
   const sync = ()=>{
-    const x = (_refs().gridEl.scrollLeft || 0);
+//    const x = (_refs().gridEl.scrollLeft || 0);
+    const x = (grid.scrollLeft || 0);
     monthRow.style.transform = `translateX(${-x}px)`;
     dayRow.style.transform   = `translateX(${-x}px)`;
   };
