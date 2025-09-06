@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CSV to Gantt Viewer | v62</title>
+  <title>CSV to Gantt Viewer | v64</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="./images/icons.png">
 </head>
@@ -11,6 +11,10 @@
   <header class="app-header">
     <h1>CSV to Gantt Viewer</h1>
     <div class="actions">
+      <label for="csvSelector">過去履歴:</label>
+      <select id="csvSelector" disabled>
+        <option value="">(読み込み中...)</option>
+      </select>
       <button id="toggleAllBtn" title="すべて展開/折りたたみを切替">全て折りたたむ</button>
 
       <button id="toggleSubsBtn"  title="観点（中レベル）を一括で展開/折りたたみ">観点のみ折りたたみ</button>
@@ -18,7 +22,6 @@
   
       <label class="file-btn">CSVを選択<input type="file" id="fileInput" accept=".csv,text/csv" /></label>
       <button id="previewBtn" title="CSVのプレビューを表示">CSVのプレビュー</button>
-      <button id="sampleBtn">サンプル読込</button>
       <label class="toggle"><input type="checkbox" id="liveToggle" checked />ライブプレビュー</label>
       <select id="zoom" title="表示スケール">
         <option value="day" selected>日表示</option>

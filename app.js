@@ -13,7 +13,9 @@ import { render, renderHeader, fixBottomSync } from './js/renderer.js';
 import { initEvents } from './js/events.js';
 // v64
 import { generateCore } from './js/generator.js';
-import { sampleCSV } from './js/samples.js';
+// v68
+import { initServerCsvPicker } from './js/csv-select.js';
+//import { sampleCSV } from './js/samples.js';
 import { openModal, closeModal, showCsvPreview } from './js/modal.js';
 import { syncHeaderToGrid, attachScrollSync, onColResizerMouseDown } from './js/layout.js';
 import { makeOnToggleAllClick, makeOnToggleSubsClick, makeOnToggleTasksClick,
@@ -116,8 +118,15 @@ let _syncingV = false;
 
 function bindEvents(){
   // header follow width changes
+
+//  new ResizeObserver(()=>{
+//    renderHeader(daysBetween(state.model.min, state.model.max), 80);
+//  }).observe(document.getElementById('taskLabels'));
   new ResizeObserver(()=>{
-    renderHeader(daysBetween(state.model.min, state.model.max), 80);
+    // モデル未構築時はスキップ（初回起動のエラーを回避）
+    if (!state?.model?.min || !state?.model?.max) return;
+    const span = Math.max(1, daysBetween(state.model.min, state.model.max));
+    renderHeader(span, 80);
   }).observe(document.getElementById('taskLabels'));
 }
 
@@ -193,7 +202,7 @@ export function onFitClick(){
   fixBottomSync();
 }
 
-// サンプルCSV読込み
+/* // サンプルCSV読込みハンドラ
 export function onSampleClick(){
   const s = sampleCSV();
   csvInput.value = s;
@@ -201,7 +210,23 @@ export function onSampleClick(){
   generate();
   const fi = document.getElementById('fileInput');
   if (fi) fi.value = '';
+}*/
+
+// v68 取得CSVテキストを既存パイプラインへ投入
+function handleServerCsvText(csvText, meta) {
+  const ta = document.getElementById('csvInput');
+  if (ta) ta.value = csvText;
+  try { renderCsvPreview(csvText); } catch (_) {}
+
+  // 既存のパイプライン（parse→model→render）に投入
+  generate();
+
+  // 同じファイルを input で再選択しても change が走るようにクリア
+  const fi = document.getElementById('fileInput');
+  if (fi) { try { fi.value = ''; } catch(_) {} }
+  if (meta?.name) console.log(`[server csv] ${meta.name} を読み込み→描画しました`);
 }
+
 
 window.addEventListener('DOMContentLoaded', ()=>{
   // refs
@@ -238,7 +263,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // v63 イベントを初期化時に起動
   initEvents({
     onZoomChange, onRenderClick, onPreviewClick,
-    onFileInputChange, onLabelsClick, onSampleClick,
+//    onFileInputChange, onLabelsClick, onSampleClick,
+    onFileInputChange, onLabelsClick,
     onColResizerMouseDown,
     onToggleAllClick, onToggleSubsClick, onToggleTasksClick,
     onModalCloseClick, onBackdropClick, onEscKeydown,
@@ -247,11 +273,21 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
   // modal closed at init
   document.body.classList.remove('modal-open');
-  const s = sampleCSV();
-  csvInput.value = s;
-  renderCsvPreview(s);
-  generate();
-  updateGlobalButtons();   // 追記 v44
-});
+//   const s = sampleCSV();
+//   csvInput.value = s;
+//   renderCsvPreview(s);
+//   generate();
+  updateGlobalButtons();   // v44
 
+  // v68 保管済CSVプルダウンを初期化（ESMコールバック連携）
+  // v69 保管済CSV＋サンプルCSVプルダウンを初期化（サンプルの先頭を自動描画）
+  initServerCsvPicker({
+    selectId: 'csvSelector',
+    onLoadCsvText: (text, meta) => handleServerCsvText(text, meta),
+    manifestUrl: './csv/manifest.json',
+    samplesUrl:  './csv/samples.json',
+    csvBase: './csv/',
+    maxItems: 10,
+  })
+});
 
