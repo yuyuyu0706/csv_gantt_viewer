@@ -680,7 +680,8 @@ export function render(){
   // 1) 今日の X（表示範囲外なら描かない）
   //const todayDaysFromMin = Math.floor((__todayUTC0 - min)/86400000);
   const todayDaysFromMin = Math.floor((__todayUTC0.getTime() - min.getTime())/86400000);
-  const todayX = todayDaysFromMin * dayWidth;
+  //const todayX = todayDaysFromMin * dayWidth;
+  const todayX = Number(todayDaysFromMin) * Number(dayWidth);
   const canvasWidth = canvas.offsetWidth || widthPx;
   if (todayX < 0 || todayX > canvasWidth) { if (todayEl) todayEl.hidden = true; }
 
@@ -773,7 +774,8 @@ export function renderHeader(totalDays, RIGHT_PAD){
   // ローカル変数を定義
 //  const min = /** @type {Date} */ (state.model.min);
   const min = state.model.min;
-  const dayWidth = /** @type {number} */ (state.model.dayWidth);
+//  const dayWidth = /** @type {number} */ (state.model.dayWidth);
+  const dayWidth = Number(state.model.dayWidth);
   const grid = /** @type {GridWithSync} */ (gridEl);
 
   // ラベル列ぶんだけ押し出す
