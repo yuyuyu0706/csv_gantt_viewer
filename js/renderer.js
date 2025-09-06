@@ -228,6 +228,13 @@ function _refs(){
 }
 
 /**
+ * `TaskItem[] | undefined | null` を確実に `TaskItem[]` にするナロー関数
+ * @param {TaskItem[] | undefined | null} a
+ * @returns {TaskItem[]}
+ */
+function ensureTasks(a){ return Array.isArray(a) ? a : []; }
+
+/**
  * メイン描画関数
  *
  * 行構造の生成、ラベル、バー、依存線、今日線イナズマをすべて描画する。
@@ -321,17 +328,27 @@ export function render(){
 //      }));
 
       // 観点見出し行（items を確定的に TaskItem[] にしてから push）
-      /** @type {TaskItem[]} */
-      const subItems = /** @type {TaskItem[]} */ (sb.items || []);
-      /** @type {SubGroupRow} */
-      const subRow = {
+      ///** @type {TaskItem[]} */
+//      const subItems = /** @type {TaskItem[]} */ (sb.items || []);
+  //    /** @type {SubGroupRow} */
+    //  const subRow = {
+      //  type: 'subgroup',
+//        cat: g.cat,
+  //      sub: String(subName || ''),
+    //    key,
+      //  items: subItems,
+//      };
+//      rows.push(subRow);
+
+      // items を関数で TaskItem[] に“確定”させてから SubGroupRow を構築
+      const subItems = ensureTasks(sb.items);
+      rows.push(/** @type {SubGroupRow} */({
         type: 'subgroup',
         cat: g.cat,
         sub: String(subName || ''),
         key,
-        items: subItems,
-      };
-      rows.push(subRow);
+        items: subItems
+      }));
 
       // 折りたたみ中なら子行なし
       if (state.collapsedSubs.has(key)) continue;
