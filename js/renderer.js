@@ -272,6 +272,7 @@ export function render(){
     }
 
     // v49: 観点の最小開始日で並べ替え
+    /** @type {{ subName: string, items: TaskItem[], minS: Date|null }[]} */
     const subsArr = Array.from(bySub.entries()).map(([subName, items]) => {
       /** @type {Date|null} */
       let minS = null;
@@ -292,8 +293,14 @@ export function render(){
     });
 
     // rows 構築
-    for (const { subName, items } of subsArr) {
+//    for (const { subName, items } of subsArr) {
+//      const key = `${g.cat}::${subName}`;
+    for (const sb of subsArr) {
+      const subName = sb.subName;
+      /** @type {TaskItem[]} */
+      const items = sb.items;  // ← ここで確実に TaskItem[] に固定
       const key = `${g.cat}::${subName}`;
+
       let withTask = false;
       for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
 
@@ -301,7 +308,8 @@ export function render(){
       rows.push(/** @type {Row} */ ({
         type:'subgroup', cat:g.cat,
         sub:String(subName || ''), key,
-        items: /** @type {TaskItem[]} */(items)
+//        items: /** @type {TaskItem[]} */(items)
+        items
       }));
 
       // 折りたたみ中なら子行なし
