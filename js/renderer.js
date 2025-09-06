@@ -193,8 +193,6 @@ function findSnapDateForTodayLine(tasks, todayUTC0) {
     /** @type {Date} */
     const endDate = /** @type {Date} */ (cur.end); // narrow を明示化
     if (best === null || endDate > best) best = endDate;
-//    // cur.end は instanceof Date をフィルタ済み
-//    if (best === null || cur.end > best) best = cur.end;
   }
   return best;
 }
@@ -246,7 +244,6 @@ export function render(){
   /** @type {Row[]} */
   const rows=[];
 
-//  for(const g of state.model.groups){
   /** @type {Array<{cat:string, items: TaskItem[]}>} */
   const groups = /** @type {any} */ (state.model.groups || []);
   for (const g of groups){
@@ -258,7 +255,6 @@ export function render(){
     if (g.cat === 'マイルストーン') {
       for (const t of g.items) {
         const title = t.sub || t.task || t.name || '';
-        //rows.push(/** @type {Row} */ {type:'milestone', cat:g.cat, item:t, displayName:title });
         rows.push(/** @type {Row} */ ({ type:'milestone', cat:g.cat, item:t, displayName:String(title) }));
       }
       continue;
@@ -299,8 +295,6 @@ export function render(){
       for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
 
       // 観点見出し行
-//      rows.push(/** @type {Row} */ { type:'subgroup', cat:g.cat, sub:subName, key, items });
-//      rows.push(/** @type {Row} */ ({ type:'subgroup', cat:g.cat, sub:String(subName || ''), key, items }));
       rows.push(/** @type {Row} */ ({
         type:'subgroup', cat:g.cat,
         sub:String(subName || ''), key,
@@ -358,7 +352,6 @@ export function render(){
       n.className='label task';
       n.dataset.cat=r.cat;
       const pp = prioClassText(String(r.item.priority || ''));
-//      n.innerHTML = `<span class="name">${r.displayName || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       n.innerHTML = `<span class="name">${String(r.displayName || r.item.name || '')}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       labelsEl.appendChild(n);
 
@@ -366,7 +359,6 @@ export function render(){
       const n = document.createElement('div');
       n.className = 'label milestone';
       n.dataset.cat = r.cat;
-//      n.innerHTML = `<span class="name">${r.displayName || ''}</span><span class="prio"></span>`;
       n.innerHTML = `<span class="name">${String(r.displayName || '')}</span><span class="prio"></span>`;
       labelsEl.appendChild(n);
 
@@ -503,7 +495,6 @@ export function render(){
         const bar  = document.createElement('div');
         bar.className = 'bar subcat';   // 青バー
         bar.dataset.cat = r.cat;
-//        bar.dataset.sub = r.sub;
         bar.dataset.sub = String(r.sub || '');
         const top = rowIndex*ROW_H + Math.max(0, Math.floor((ROW_H - catH)/2)) + 2;
         bar.style.left  = left + 'px';
@@ -544,7 +535,6 @@ export function render(){
 
       const star = document.createElement('div');
       star.className = 'ms-star';
-//      star.textContent = `★ ${fmtMD(t.start)} ${t.name}`;
       star.textContent = `★ ${fmtMD(t.start)} ${String(t.name || '')}`;
       star.style.left = (left + 6) + 'px';
       star.style.top  = midY + 'px';
@@ -745,8 +735,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
   const grid = /** @type {GridWithSync} */ (gridEl);
 
   // ラベル列ぶんだけ押し出す
-//  const spacerW = document.getElementById('taskLabels').offsetWidth
-//      || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--labels-w')) || 360;
   const labelsRoot = document.getElementById('taskLabels');
   const spacerW = (labelsRoot ? labelsRoot.offsetWidth : 0)
       || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--labels-w')) || 360;
@@ -761,7 +749,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
     dayRow.style.width   = w + 'px';
   }
 
-  /** @type {'day'|'week'|'month'} */
   const mode = /** @type {'day'|'week'|'month'} */ (zoomSel ? zoomSel.value : 'day');
 
   // ガード分
@@ -859,9 +846,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
  */
 export function fixBottomSync(){
   try{
-//    const labels = document.getElementById('taskLabels');
-//    const grid   = document.getElementById('ganttGrid');
-//    const bars   = document.getElementById('bars');
     const labels = /** @type {HTMLElement|null} */ (document.getElementById('taskLabels'));
     const grid   = /** @type {HTMLElement|null} */ (document.getElementById('ganttGrid'));
     const bars   = /** @type {HTMLElement|null} */ (document.getElementById('bars'));
@@ -870,7 +854,6 @@ export function fixBottomSync(){
     const hsb = Math.max(0, grid.offsetHeight - grid.clientHeight);
     labels.style.paddingBottom = hsb + 'px';
 
-//    let spacer = document.getElementById('bottomSpacer');
     /** @type {HTMLElement|null} */
     let spacer = /** @type {HTMLElement|null} */ (document.getElementById('bottomSpacer'));
 
