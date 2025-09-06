@@ -299,7 +299,11 @@ export function render(){
 
       // 観点見出し行
 //      rows.push(/** @type {Row} */ { type:'subgroup', cat:g.cat, sub:subName, key, items });
-      rows.push(/** @type {Row} */ ({ type:'subgroup', cat:g.cat, sub:String(subName || ''), key, items }));
+//      rows.push(/** @type {Row} */ ({ type:'subgroup', cat:g.cat, sub:String(subName || ''), key, items }));
+      rows.push(/** @type {Row} */ ({
+        type:'subgroup', cat:g.cat,
+        sub:String(subName || ''), key,
+        items: /** @type {TaskItem[]} */(items) }));
 
       // 折りたたみ中なら子行なし
       if (state.collapsedSubs.has(key)) continue;
