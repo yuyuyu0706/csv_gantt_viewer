@@ -272,9 +272,11 @@ export function render(){
     const bySub = new Map();
     for (const t of g.items){
       const key = (t.sub || '(なし)');
-      /** @type {TaskItem[]} */
-      let arr = bySub.get(key);
-      if (!arr) { arr = []; bySub.set(key, arr); }
+      const arr = ensureTasks(bySub.get(key));
+//      /** @type {TaskItem[]} */
+//      let arr = bySub.get(key);
+//      if (!arr) { arr = []; bySub.set(key, arr); }
+      if (!bySub.has(key)) bySub.set(key, arr);
       arr.push(t);
     }
 
