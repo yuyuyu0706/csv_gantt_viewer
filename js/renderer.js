@@ -226,11 +226,6 @@ function _refs(){
  * @returns {void}
  */
 export function render(){
-  //const { labelsEl, canvas } = _refs();
-
-  // rows list
-  //labelsEl.innerHTML='';
-  //const rows=[];
 
   const { labelsEl, canvas, gridEl, monthRow, dayRow, leftHead } = _refs();
   if (!labelsEl || !canvas || !gridEl || !monthRow || !dayRow || !leftHead) return;
@@ -255,9 +250,6 @@ export function render(){
     }
 
     // 観点ごとにグループ化
-//    const bySub = new Map();
-//    for(const t of g.items){
-
     /** @type {Map<string, TaskItem[]>} */
     const bySub = new Map();
     for (const t of g.items){
@@ -267,13 +259,11 @@ export function render(){
     }
 
     // v49: 観点の最小開始日で並べ替え
-//    const subsArr = Array.from(bySub.entries()).map(([subName, items]) => {
     const subsArr = Array.from(bySub.entries()).map(([subName, items]) => {
       /** @type {Date|null} */
-
       let minS = null;
+
       for (const it of /** @type {TaskItem[]} */(items)) {
-//      for (const it of items) {
         if (!it.start) continue;
         if (minS === null || it.start < minS) minS = it.start;
       }
@@ -288,9 +278,9 @@ export function render(){
     // rows 構築
     for (const { subName, items } of subsArr) {
       const key = `${g.cat}::${subName}`;
-//      const withTask = items.some(it => it.task);
       let withTask = false;
       for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
+
       // 観点見出し行
       rows.push({ type:'subgroup', cat:g.cat, sub:subName, key, items });
 
@@ -298,8 +288,6 @@ export function render(){
       if (state.collapsedSubs.has(key)) continue;
 
       // v50: 観点内も開始日→終了日→名前で安定ソート
-//      const tasksInSub = items.filter(it => it.task).slice().sort(cmpByStartThenName);
-//      const plainSub   = items.filter(it => !it.task).slice().sort(cmpByStartThenName);
       const tasksInSub = /** @type {TaskItem[]} */ (items.filter((it)=> !!it.task)).slice().sort(cmpByStartThenName);
       const plainSub   = /** @type {TaskItem[]} */ (items.filter((it)=> !it.task)).slice().sort(cmpByStartThenName);
       if (withTask) {
@@ -326,7 +314,6 @@ export function render(){
       n.className='label group'+(state.collapsedCats.has(r.cat)?' collapsed':'');
       n.dataset.cat=r.cat;
       n.innerHTML = `<span class="name">${r.cat}</span><span class="prio"></span>`;
-//      _refs().labelsEl.appendChild(n);
       labelsEl.appendChild(n);
 
     } else if (r.type === 'subgroup') {
@@ -336,7 +323,6 @@ export function render(){
       n.dataset.cat = r.cat;
       n.dataset.key = key;
       n.innerHTML = `<span class="name">${r.sub}</span><span class="prio"></span>`;
-//      _refs().labelsEl.appendChild(n);
       labelsEl.appendChild(n);
 
     }else if(r.type==='task'){
@@ -345,7 +331,6 @@ export function render(){
       n.dataset.cat=r.cat;
       const pp=prioClassText(r.item.priority);
       n.innerHTML = `<span class="name">${r.displayName || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
-//      _refs().labelsEl.appendChild(n);
       labelsEl.appendChild(n);
 
     } else if (r.type === 'milestone') {
@@ -353,7 +338,6 @@ export function render(){
       n.className = 'label milestone';
       n.dataset.cat = r.cat;
       n.innerHTML = `<span class="name">${r.displayName || ''}</span><span class="prio"></span>`;
-//      _refs().labelsEl.appendChild(n);
       labelsEl.appendChild(n);
 
     }else{ // 'subtask'
@@ -364,7 +348,6 @@ export function render(){
       n.innerHTML = `<span class="name">${
         r.displayName || r.item.sub || r.item.name
       }</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
-//      _refs().labelsEl.appendChild(n);
       labelsEl.appendChild(n);
     }
   }
@@ -381,12 +364,12 @@ export function render(){
 
   // 幅計算（右パディング込み）
   const RIGHT_PAD = 120;
-//  const totalDays = daysBetween(state.model.min, state.model.max);
-//  const widthPx   = totalDays * state.model.dayWidth + RIGHT_PAD;
 
+  // ローカル変数を定義
   const min = /** @type {Date} */ (state.model.min);
   const max = /** @type {Date} */ (state.model.max);
   const dayWidth = /** @type {number} */ (state.model.dayWidth);
+
   const totalDays = daysBetween(min, max);
   const widthPx   = totalDays * dayWidth + RIGHT_PAD;
 
@@ -411,10 +394,10 @@ export function render(){
   // 縦罫線（日/週/月）…元仕様：day は毎日、週/月は境界のみ
   const zoomSel = _refs().zoomSel;
   const mode = zoomSel ? zoomSel.value : 'day';
-  let cur = new Date(state.model.min);
+  let cur = new Date(min);
   for(let d=0; d<=totalDays; d++){
     if(d<totalDays && (mode==='day' || __isBoundary(cur,mode))){
-      const x = d * state.model.dayWidth;
+      const x = d * dayWidth;
       const v = document.createElement('div');
       v.className='vline';
       v.style.left=x+'px';
@@ -440,7 +423,7 @@ export function render(){
   // === イナズマ線用：今日(UTC 0時)と候補格納 ===
   const __today = new Date();
   const __todayUTC0 = new Date(Date.UTC(__today.getUTCFullYear(), __today.getUTCMonth(), __today.getUTCDate()));
-  const __zigTargets = [];  // {rowTop, rowBottom, midY, endX}
+  const __zigTargets = [];
 
   for(const r of rows){
     if(r.type==='group'){
@@ -452,10 +435,10 @@ export function render(){
         if(maxE===null||t.end>maxE) maxE=t.end;
       }
       if(minS && maxE){
-        const offsetDays = Math.floor((minS - state.model.min)/86400000);
+        const offsetDays = Math.floor((minS - min)/86400000);
         const spanDays   = Math.floor((maxE - minS)/86400000)+1;
-        const left = offsetDays * state.model.dayWidth;
-        const bw = Math.max(6, spanDays * state.model.dayWidth - 2);
+        const left = offsetDays * dayWidth;
+        const bw = Math.max(6, spanDays * dayWidth - 2);
         const bar=document.createElement('div');
         bar.className='bar cat';
         bar.dataset.cat=r.cat;
@@ -467,7 +450,6 @@ export function render(){
 
         // Start/End M/D
         const midY = top + catH/2;
-        //appendDateLabels(bars, left, left + bw, midY, minS, maxE);
         appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
       }
       rowIndex++;
@@ -484,10 +466,10 @@ export function render(){
         if (maxE === null || t.end   > maxE) maxE = t.end;
       }
       if (minS && maxE) {
-        const offsetDays = Math.floor((minS - state.model.min)/86400000);
+        const offsetDays = Math.floor((minS - min)/86400000);
         const spanDays   = Math.floor((maxE - minS)/86400000) + 1;
-        const left = offsetDays * state.model.dayWidth;
-        const bw   = Math.max(6, spanDays * state.model.dayWidth - 2);
+        const left = offsetDays * dayWidth;
+        const bw   = Math.max(6, spanDays * dayWidth - 2);
         const bar  = document.createElement('div');
         bar.className = 'bar subcat';   // 青バー
         bar.dataset.cat = r.cat;
@@ -499,8 +481,8 @@ export function render(){
         bars.appendChild(bar);
 
         const midY = top + catH/2;
-//        appendDateLabels(bars, left, left + bw, midY, minS, maxE);
         appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
+
         // v59: 観点にも中間チェック ★M/D
         let repCheck = null;
         for (const t of (r.items || [])) {
@@ -509,7 +491,7 @@ export function render(){
           }
         }
         if (repCheck) {
-          const checkX = Math.floor((repCheck - state.model.min)/86400000) * state.model.dayWidth;
+          const checkX = Math.floor((repCheck - min)/86400000) * dayWidth;
           const star = document.createElement('div');
           star.className = 'check-label';
           star.textContent = '★ ' + fmtMD(repCheck) + '中間';
@@ -524,9 +506,8 @@ export function render(){
 
     if (r.type === 'milestone') {
       const t = r.item;
-//      const offsetDays = Math.floor((t.start - state.model.min)/86400000);
       const offsetDays = Math.floor((t.start - min)/86400000);
-      const left = offsetDays * state.model.dayWidth;
+      const left = offsetDays * dayWidth;
       const midY = (rowIndex * ROW_H) + (ROW_H / 2);
 
       const star = document.createElement('div');
@@ -542,12 +523,8 @@ export function render(){
 
     // 通常タスクバー
     const t = r.item;
-//    const offsetDays = Math.floor((t.start - state.model.min)/86400000);
     const offsetDays = Math.floor((t.start - min)/86400000);
     const spanDays   = Math.floor((t.end   - t.start)/86400000)+1;
-
-//    const left = offsetDays * state.model.dayWidth;
-//    const bw   = Math.max(6, spanDays * state.model.dayWidth - 2);
     const left = offsetDays * dayWidth;
     const bw   = Math.max(6, spanDays * dayWidth - 2);
 
@@ -607,8 +584,8 @@ export function render(){
 
     // 中間チェック ★M/D
     if (t.check instanceof Date) {
-      const checkDaysFromMin = Math.floor((t.check - state.model.min)/86400000);
-      const checkX = checkDaysFromMin * state.model.dayWidth;
+      const checkDaysFromMin = Math.floor((t.check - min)/86400000);
+      const checkX = checkDaysFromMin * dayWidth;
       const cx = Math.max(left + 0, Math.min(left + bw, checkX));
       const cy = barTop + (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || BAR_H)/2 + 15;
       const ck = document.createElement('div');
@@ -638,12 +615,6 @@ export function render(){
     .sort((a,b)=> a.rowTop - b.rowTop);
 
   // 1) 今日の X（表示範囲外なら描かない）
-//  const todayDaysFromMin = Math.floor((__todayUTC0 - state.model.min)/86400000);
-//  const todayX = todayDaysFromMin * state.model.dayWidth;
-//  if (todayX < 0 || todayX > canvas.offsetWidth) {
-//    todayEl.hidden = true;
-//  }
-
   const todayDaysFromMin = Math.floor((__todayUTC0 - min)/86400000);
   const todayX = todayDaysFromMin * dayWidth;
   const canvasWidth = canvas.offsetWidth || widthPx;
@@ -726,7 +697,6 @@ export function render(){
  * @returns {void}
  */
 export function renderHeader(totalDays, RIGHT_PAD){
-//  const { monthRow, dayRow, leftHead, gridEl } = _refs();
   const { monthRow, dayRow, leftHead, gridEl, zoomSel } = _refs();
   if (!monthRow || !dayRow || !leftHead || !gridEl) return;
 
@@ -742,7 +712,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
 
   // 可視幅を本体に合わせる
   /** @type {GridWithSync} */
-  //const grid = document.getElementById('ganttGrid');
   const grid = /** @type {GridWithSync} */ (gridEl);
 
   const w = grid ? grid.scrollWidth : 0;
@@ -751,11 +720,8 @@ export function renderHeader(totalDays, RIGHT_PAD){
     dayRow.style.width   = w + 'px';
   }
 
-  //const zoomSel = _refs().zoomSel;
-
   /** @type {'day'|'week'|'month'} */
   const mode = zoomSel ? zoomSel.value : 'day';
-
   const dayWidth = state.model.dayWidth;
 
   // ガード分
@@ -801,11 +767,11 @@ export function renderHeader(totalDays, RIGHT_PAD){
   if(mode!=='month'){
     let d0 = new Date(state.model.min), start = 0;
     for(let d=0; d<=totalDays + GUARD_DAYS; d++){
-      const d1 = new Date(d0.getTime()+d*86400000);
+      const d1 = new Date(d0.getTime() + d*86400000);
       const monthChanged = (d === totalDays + GUARD_DAYS) || (d1.getUTCDate() === 1);
       if(monthChanged){
         const span = d - start;
-        const labelDate = new Date(d0.getTime()+start*86400000);
+        const labelDate = new Date(d0.getTime() + start*86400000);
         const label = document.createElement('div');
         label.className='label';
         label.style.left = (start*dayWidth + span*dayWidth/2) + 'px';
@@ -833,10 +799,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
     monthRow.style.transform = `translateX(${-x}px)`;
     dayRow.style.transform   = `translateX(${-x}px)`;
   };
-//  if (_refs().gridEl.__headerSync) _refs().gridEl.removeEventListener('scroll', _refs().gridEl.__headerSync);
-//  _refs().gridEl.__headerSync = sync;
-//  _refs().gridEl.addEventListener('scroll', sync, { passive: true });
-//  sync();
 
   // 既存のハンドラを外してから登録（undefined を addEventListener に渡さない）
   if (grid.__headerSync) grid.removeEventListener('scroll', grid.__headerSync);
