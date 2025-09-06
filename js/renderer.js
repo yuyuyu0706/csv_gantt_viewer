@@ -186,7 +186,6 @@ function findSnapDateForTodayLine(tasks, todayUTC0) {
     _isGrandchildTask(t) && !_isDoneStatus(t) && (t.end instanceof Date) && (t.end < todayUTC0)
   );
   if (!cands.length) return null;
-//  return cands.reduce((best, cur) => (best === null || cur.end > best ? cur.end : best), null);
 
   /** @type {Date|null} */
   let best = null;
@@ -245,7 +244,6 @@ export function render(){
   const rows=[];
 
   for(const g of state.model.groups){
-//    rows.push({type:'group', cat:g.cat, items:g.items});
     rows.push(/** @type {Row} */ ({type:'group', cat:g.cat, items:g.items}));
     if (state.collapsedCats.has(g.cat)) continue;
 
@@ -253,7 +251,6 @@ export function render(){
     if (g.cat === 'マイルストーン') {
       for (const t of g.items) {
         const title = t.sub || t.task || t.name || '';
-//        rows.push({ type:'milestone', cat:g.cat, item:t, displayName:title });
         rows.push(/** @type {Row} */ {type:'milestone', cat:g.cat, item:t, displayName:title });
       }
       continue;
@@ -264,8 +261,10 @@ export function render(){
     const bySub = new Map();
     for (const t of g.items){
       const key = (t.sub || '(なし)');
-      if(!bySub.has(key)) bySub.set(key, []);
-      bySub.get(key).push(t);
+      /** @type {TaskItem[]} */
+      let arr = bySub.get(key);
+      if (!arr) { arr = []; bySub.set(key, arr); }
+      arr.push(t);
     }
 
     // v49: 観点の最小開始日で並べ替え
@@ -292,7 +291,6 @@ export function render(){
       for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
 
       // 観点見出し行
-//      rows.push({ type:'subgroup', cat:g.cat, sub:subName, key, items });
       rows.push(/** @type {Row} */ { type:'subgroup', cat:g.cat, sub:subName, key, items });
 
       // 折りたたみ中なら子行なし
@@ -304,24 +302,21 @@ export function render(){
       if (withTask) {
         if (!state.hideTaskRows) {
           for (const t of tasksInSub) {
-//            rows.push({ type:'task', cat:g.cat, item:t, displayName:t.task });
-//            rows.push(/** @type {Row} */ { type:'task', cat:g.cat, item:t, displayName:t.task });
             rows.push(/** @type {Row} */ ({
               type:'task', cat:g.cat, item:t,
               displayName:String(t.task || t.name || '') }));
           }
         }
         for (const t of plainSub) {
-//          rows.push({ type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
-//          rows.push(/** @type {Row} */ { type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
           rows.push(/** @type {Row} */ ({
             type:'subtask', cat:g.cat, item:t,
             displayName:String(t.sub || t.name || '') }));
         }
       } else {
         for (const t of plainSub) {
-//          rows.push({ type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
-          rows.push(/** @type {Row} */ { type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
+          rows.push(/** @type {Row} */ {
+            type:'subtask', cat:g.cat, item:t,
+            displayName:t.sub || t.name });
         }
       }
     }
@@ -349,7 +344,6 @@ export function render(){
       const n=document.createElement('div');
       n.className='label task';
       n.dataset.cat=r.cat;
-//    const pp = prioClassText(r.item.priority);
       const pp = prioClassText(String(r.item.priority || ''));
       n.innerHTML = `<span class="name">${r.displayName || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       labelsEl.appendChild(n);
@@ -415,7 +409,6 @@ export function render(){
 
   // 縦罫線（日/週/月）…元仕様：day は毎日、週/月は境界のみ
   const zoomSel = _refs().zoomSel;
-  //const mode = zoomSel ? zoomSel.value : 'day';
   const mode = /** @type {'day'|'week'|'month'} */ (zoomSel ? zoomSel.value : 'day');
   let cur = new Date(min);
   for(let d=0; d<=totalDays; d++){
@@ -513,12 +506,10 @@ export function render(){
             if (repCheck === null || t.check < repCheck) repCheck = t.check;
           }
         }
-//        if (repCheck) {
         if (repCheck instanceof Date) {
           const checkX = Math.floor((repCheck - min)/86400000) * dayWidth;
           const star = document.createElement('div');
           star.className = 'check-label';
-//          star.textContent = '★ ' + fmtMD(repCheck) + '中間';
           star.textContent = '★ ' + fmtMD(/** @type {Date} */(repCheck)) + '中間';
           star.style.left = (checkX + 0) + 'px';
           star.style.top  = (midY + 9) + 'px';
