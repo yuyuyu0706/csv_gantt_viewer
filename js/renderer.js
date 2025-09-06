@@ -385,8 +385,10 @@ export function render(){
   const barsEl      = canvas.querySelector('#bars');
   const todayEl     = _refs().todayEl; // id で取得したものを利用
   if (!(linesWrapEl instanceof HTMLElement) || !(barsEl instanceof HTMLElement)) return;
-  const linesWrap = linesWrapEl;
-  const bars = barsEl;
+  //const linesWrap = linesWrapEl;
+  //const bars = barsEl;
+  const linesWrap = /** @type {HTMLElement} */ (linesWrapEl);
+  const bars      = /** @type {HTMLElement} */ (barsEl);
 
   linesWrap.innerHTML='';
   bars.innerHTML='';
