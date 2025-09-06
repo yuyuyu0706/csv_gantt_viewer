@@ -327,10 +327,11 @@ export function render(){
         }
       } else {
         for (const t of plainSub) {
-          rows.push(/** @type {Row} */ {
+          rows.push(/** @type {Row} */ ({
             type:'subtask', cat:g.cat, item:t,
-            displayName:t.sub || t.name
-          });
+//            displayName:t.sub || t.name
+            displayName:String(t.sub || t.name || '')
+          }));
         }
       }
     }
@@ -347,11 +348,14 @@ export function render(){
 
     } else if (r.type === 'subgroup') {
       const n = document.createElement('div');
-      const key = r.key || `${r.cat}::${r.sub}`;
+      //const key = r.key || `${r.cat}::${r.sub}`;
+      const key = String((/** @type {any} */(r)).key || `${r.cat}::${String((/** @type {any} */(r)).sub || '')}`);
       n.className = 'label subgroup' + (state.collapsedSubs.has(key) ? ' collapsed' : '');
       n.dataset.cat = r.cat;
-      n.dataset.key = key;
-      n.innerHTML = `<span class="name">${r.sub}</span><span class="prio"></span>`;
+      // n.dataset.key = key;
+      n.dataset.key = String(key);
+      //n.innerHTML = `<span class="name">${r.sub}</span><span class="prio"></span>`;
+      n.innerHTML = `<span class="name">${String((/** @type {any} */(r)).sub || '')}</span><span class="prio"></span>`;
       labelsEl.appendChild(n);
 
     }else if(r.type==='task'){
@@ -582,7 +586,8 @@ export function render(){
 
     const name = document.createElement('div');
     name.className = 'name';
-    name.textContent= t.name;
+//    name.textContent= t.name;
+    name.textContent = String(t.name || '');
     bar.appendChild(name);
 
     // バー外側の M/D ラベル
