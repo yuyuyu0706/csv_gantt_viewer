@@ -280,7 +280,10 @@ export function render(){
         if (!it.start) continue;
         if (minS === null || it.start < minS) minS = it.start;
       }
-      return { subName, items, minS };
+      // return { subName, items, minS };
+      return /** @type {{ subName: string, items: TaskItem[], minS: Date|null }} */ ({
+        subName, items: /** @type {TaskItem[]} */(items), minS
+      });
     }).sort((a, b) => {
       const ax = a.minS ? a.minS.getTime() : Infinity;
       const bx = b.minS ? b.minS.getTime() : Infinity;
@@ -298,7 +301,8 @@ export function render(){
       rows.push(/** @type {Row} */ ({
         type:'subgroup', cat:g.cat,
         sub:String(subName || ''), key,
-        items: /** @type {TaskItem[]} */(items) }));
+        items: /** @type {TaskItem[]} */(items)
+      }));
 
       // 折りたたみ中なら子行なし
       if (state.collapsedSubs.has(key)) continue;
@@ -311,19 +315,22 @@ export function render(){
           for (const t of tasksInSub) {
             rows.push(/** @type {Row} */ ({
               type:'task', cat:g.cat, item:t,
-              displayName:String(t.task || t.name || '') }));
+              displayName:String(t.task || t.name || '')
+            }));
           }
         }
         for (const t of plainSub) {
           rows.push(/** @type {Row} */ ({
             type:'subtask', cat:g.cat, item:t,
-            displayName:String(t.sub || t.name || '') }));
+            displayName:String(t.sub || t.name || '')
+          }));
         }
       } else {
         for (const t of plainSub) {
           rows.push(/** @type {Row} */ {
             type:'subtask', cat:g.cat, item:t,
-            displayName:t.sub || t.name });
+            displayName:t.sub || t.name
+          });
         }
       }
     }
