@@ -190,8 +190,11 @@ function findSnapDateForTodayLine(tasks, todayUTC0) {
   /** @type {Date|null} */
   let best = null;
   for (const cur of cands) {
-    // cur.end は instanceof Date をフィルタ済み
-    if (best === null || cur.end > best) best = cur.end;
+    /** @type {Date} */
+    const endDate = /** @type {Date} */ (cur.end); // narrow を明示化
+    if (best === null || endDate > best) best = endDate;
+//    // cur.end は instanceof Date をフィルタ済み
+//    if (best === null || cur.end > best) best = cur.end;
   }
   return best;
 }
@@ -359,7 +362,6 @@ export function render(){
       const n=document.createElement('div');
       n.className='label subtask';
       n.dataset.cat=r.cat;
-//    const pp = prioClassText(r.item.priority);
       const pp = prioClassText(String(r.item.priority || ''));
       n.innerHTML = `<span class="name">${
         r.displayName || r.item.sub || r.item.name
