@@ -204,15 +204,16 @@ function findSnapDateForTodayLine(tasks, todayUTC0) {
  */
 function _refs(){
   return {
-    labelsEl: document.getElementById('taskLabels'),
-    gridEl:   document.getElementById('ganttGrid'),
-    monthRow: document.getElementById('monthRow'),
-    dayRow:   document.getElementById('dayRow'),
-    leftHead: document.getElementById('leftHead'),
-    headerEl: document.getElementById('ganttHeader'),
-    zoomSel:  document.getElementById('zoom'),
-    canvas:   document.getElementById('gridCanvas'),
-    bars:     document.getElementById('bars'),
+    labelsEl: /** @type {HTMLElement|null} */ (document.getElementById('taskLabels')),
+    gridEl:   /** @type {HTMLElement|null} */ (document.getElementById('ganttGrid')),
+    monthRow: /** @type {HTMLElement|null} */ (document.getElementById('monthRow')),
+    dayRow:   /** @type {HTMLElement|null} */ (document.getElementById('dayRow')),
+    leftHead: /** @type {HTMLElement|null} */ (document.getElementById('leftHead')),
+    headerEl: /** @type {HTMLElement|null} */ (document.getElementById('ganttHeader')),
+    zoomSel:  /** @type {HTMLElement|null} */ (document.getElementById('zoom')),
+    canvas:   /** @type {HTMLElement|null} */ (document.getElementById('gridCanvas')),
+    bars:     /** @type {HTMLElement|null} */ (document.getElementById('bars')),
+    todayEl:  /** @type {HTMLElement|null} */ (document.getElementById('todayLine')),
   };
 }
 
@@ -223,10 +224,19 @@ function _refs(){
  * @returns {void}
  */
 export function render(){
-  const { labelsEl, canvas } = _refs();
+  //const { labelsEl, canvas } = _refs();
+
+  // rows list
+  //labelsEl.innerHTML='';
+  //const rows=[];
+
+  const { labelsEl, canvas, gridEl, monthRow, dayRow, leftHead } = _refs();
+  if (!labelsEl || !canvas || !gridEl || !monthRow || !dayRow || !leftHead) return;
+  if (!state.model || !state.model.min || !state.model.max) return;
 
   // rows list
   labelsEl.innerHTML='';
+  /** @type {Row[]} */
   const rows=[];
 
   for(const g of state.model.groups){
