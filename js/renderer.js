@@ -730,7 +730,10 @@ export function renderHeader(totalDays, RIGHT_PAD){
   const grid = /** @type {GridWithSync} */ (gridEl);
 
   // ラベル列ぶんだけ押し出す
-  const spacerW = document.getElementById('taskLabels').offsetWidth
+//  const spacerW = document.getElementById('taskLabels').offsetWidth
+//      || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--labels-w')) || 360;
+  const labelsRoot = document.getElementById('taskLabels');
+  const spacerW = (labelsRoot ? labelsRoot.offsetWidth : 0)
       || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--labels-w')) || 360;
   leftHead.style.width = spacerW + 'px';
   monthRow.style.marginLeft = spacerW + 'px';
@@ -744,8 +747,8 @@ export function renderHeader(totalDays, RIGHT_PAD){
   }
 
   /** @type {'day'|'week'|'month'} */
-  //const mode = zoomSel ? zoomSel.value : 'day';
   const mode = /** @type {'day'|'week'|'month'} */ (zoomSel ? zoomSel.value : 'day');
+
   // ガード分
   const GUARD_DAYS = 2;
   const headerWidth = (totalDays + GUARD_DAYS) * dayWidth;
@@ -811,7 +814,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
   pad1.style.width=RIGHT_PAD+'px';
   pad1.style.height='1px';
 
-//  const pad2 = pad1.cloneNode();
   const pad2 = document.createElement('div');
   pad2.style.position='absolute';
   pad2.style.left=(totalDays*dayWidth)+'px';
@@ -824,7 +826,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
   // ヘッダー横スクロール同期（translateXで追従）
   /** @type {() => void} */
   const sync = ()=>{
-//    const x = (_refs().gridEl.scrollLeft || 0);
     const x = (grid.scrollLeft || 0);
     monthRow.style.transform = `translateX(${-x}px)`;
     dayRow.style.transform   = `translateX(${-x}px)`;
