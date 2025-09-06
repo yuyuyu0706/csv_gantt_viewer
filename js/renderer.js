@@ -520,6 +520,7 @@ export function render(){
 
     if (r.type === 'milestone') {
       const t = r.item;
+      if (!(t.start instanceof Date)) { rowIndex++; continue; }
       const offsetDays = Math.floor((t.start - min)/86400000);
       const left = offsetDays * dayWidth;
       const midY = (rowIndex * ROW_H) + (ROW_H / 2);
@@ -537,6 +538,7 @@ export function render(){
 
     // 通常タスクバー
     const t = r.item;
+    if (!(t.start instanceof Date) || !(t.end instanceof Date)) { rowIndex++; continue; }
     const offsetDays = Math.floor((t.start - min)/86400000);
     const spanDays   = Math.floor((t.end   - t.start)/86400000)+1;
     const left = offsetDays * dayWidth;
