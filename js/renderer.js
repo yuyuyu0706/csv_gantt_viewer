@@ -21,6 +21,7 @@
  * @typedef {{type:'subtask',  cat:string, item: TaskItem, displayName:string}}        SubtaskRow
  * @typedef {{type:'milestone',cat:string, item: TaskItem, displayName:string}}        MilestoneRow
  * @typedef {GroupRow|SubGroupRow|TaskRow|SubtaskRow|MilestoneRow} Row
+ * @typedef {HTMLElement & { __headerSync?: (this: HTMLElement, ev: Event) => any }} GridWithSync
  */
 
 /**
@@ -200,6 +201,7 @@ function findSnapDateForTodayLine(tasks, todayUTC0) {
  *   zoomSel: HTMLSelectElement|null,
  *   canvas: HTMLElement|null,
  *   bars: HTMLElement|null
+ *   todayEl: HTMLElement|null
  * }}
  */
 function _refs(){
@@ -324,7 +326,8 @@ export function render(){
       n.className='label group'+(state.collapsedCats.has(r.cat)?' collapsed':'');
       n.dataset.cat=r.cat;
       n.innerHTML = `<span class="name">${r.cat}</span><span class="prio"></span>`;
-      _refs().labelsEl.appendChild(n);
+//      _refs().labelsEl.appendChild(n);
+      labelsEl.appendChild(n);
 
     } else if (r.type === 'subgroup') {
       const n = document.createElement('div');
@@ -333,7 +336,8 @@ export function render(){
       n.dataset.cat = r.cat;
       n.dataset.key = key;
       n.innerHTML = `<span class="name">${r.sub}</span><span class="prio"></span>`;
-      _refs().labelsEl.appendChild(n);
+//      _refs().labelsEl.appendChild(n);
+      labelsEl.appendChild(n);
 
     }else if(r.type==='task'){
       const n=document.createElement('div');
@@ -341,29 +345,29 @@ export function render(){
       n.dataset.cat=r.cat;
       const pp=prioClassText(r.item.priority);
       n.innerHTML = `<span class="name">${r.displayName || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
-      _refs().labelsEl.appendChild(n);
+//      _refs().labelsEl.appendChild(n);
+      labelsEl.appendChild(n);
 
     } else if (r.type === 'milestone') {
       const n = document.createElement('div');
       n.className = 'label milestone';
       n.dataset.cat = r.cat;
       n.innerHTML = `<span class="name">${r.displayName || ''}</span><span class="prio"></span>`;
-      _refs().labelsEl.appendChild(n);
+//      _refs().labelsEl.appendChild(n);
+      labelsEl.appendChild(n);
 
     }else{ // 'subtask'
       const n=document.createElement('div');
       n.className='label subtask';
       n.dataset.cat=r.cat;
       const pp=prioClassText(r.item.priority);
-      n.innerHTML = `<span class="name">${r.displayName || r.item.sub || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
-      _refs().labelsEl.appendChild(n);
+      n.innerHTML = `<span class="name">${
+        r.displayName || r.item.sub || r.item.name
+      }</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
+//      _refs().labelsEl.appendChild(n);
+      labelsEl.appendChild(n);
     }
   }
-
-  //const canvas   = _refs().canvas;
-//  const linesWrap= canvas.querySelector('.grid-lines');
-//  const bars     = canvas.querySelector('#bars');
-//  const todayEl  = canvas.querySelector('#todayLine');
 
   const linesWrapEl = canvas.querySelector('.grid-lines');
   const barsEl      = canvas.querySelector('#bars');
