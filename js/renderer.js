@@ -258,7 +258,8 @@ export function render(){
     if (g.cat === 'マイルストーン') {
       for (const t of g.items) {
         const title = t.sub || t.task || t.name || '';
-        rows.push(/** @type {Row} */ {type:'milestone', cat:g.cat, item:t, displayName:title });
+        //rows.push(/** @type {Row} */ {type:'milestone', cat:g.cat, item:t, displayName:title });
+        rows.push(/** @type {Row} */ ({ type:'milestone', cat:g.cat, item:t, displayName:String(title) }));
       }
       continue;
     }
@@ -357,14 +358,16 @@ export function render(){
       n.className='label task';
       n.dataset.cat=r.cat;
       const pp = prioClassText(String(r.item.priority || ''));
-      n.innerHTML = `<span class="name">${r.displayName || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
+//      n.innerHTML = `<span class="name">${r.displayName || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
+      n.innerHTML = `<span class="name">${String(r.displayName || r.item.name || '')}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       labelsEl.appendChild(n);
 
     } else if (r.type === 'milestone') {
       const n = document.createElement('div');
       n.className = 'label milestone';
       n.dataset.cat = r.cat;
-      n.innerHTML = `<span class="name">${r.displayName || ''}</span><span class="prio"></span>`;
+//      n.innerHTML = `<span class="name">${r.displayName || ''}</span><span class="prio"></span>`;
+      n.innerHTML = `<span class="name">${String(r.displayName || '')}</span><span class="prio"></span>`;
       labelsEl.appendChild(n);
 
     }else{ // 'subtask'
@@ -541,7 +544,8 @@ export function render(){
 
       const star = document.createElement('div');
       star.className = 'ms-star';
-      star.textContent = `★ ${fmtMD(t.start)} ${t.name}`;
+//      star.textContent = `★ ${fmtMD(t.start)} ${t.name}`;
+      star.textContent = `★ ${fmtMD(t.start)} ${String(t.name || '')}`;
       star.style.left = (left + 6) + 'px';
       star.style.top  = midY + 'px';
       bars.appendChild(star);
