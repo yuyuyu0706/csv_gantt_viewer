@@ -407,7 +407,8 @@ export function render(){
 
   // 縦罫線（日/週/月）…元仕様：day は毎日、週/月は境界のみ
   const zoomSel = _refs().zoomSel;
-  const mode = zoomSel ? zoomSel.value : 'day';
+  //const mode = zoomSel ? zoomSel.value : 'day';
+  const mode = /** @type {'day'|'week'|'month'} */ (zoomSel ? zoomSel.value : 'day');
   let cur = new Date(min);
   for(let d=0; d<=totalDays; d++){
     if(d<totalDays && (mode==='day' || __isBoundary(cur,mode))){
@@ -739,8 +740,8 @@ export function renderHeader(totalDays, RIGHT_PAD){
   }
 
   /** @type {'day'|'week'|'month'} */
-  const mode = zoomSel ? zoomSel.value : 'day';
-
+  //const mode = zoomSel ? zoomSel.value : 'day';
+  const mode = /** @type {'day'|'week'|'month'} */ (zoomSel ? zoomSel.value : 'day');
   // ガード分
   const GUARD_DAYS = 2;
   const headerWidth = (totalDays + GUARD_DAYS) * dayWidth;
