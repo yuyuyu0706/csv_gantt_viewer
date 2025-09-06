@@ -15,7 +15,6 @@ import { initEvents } from './js/events.js';
 import { generateCore } from './js/generator.js';
 // v68
 import { initServerCsvPicker } from './js/csv-select.js';
-//import { sampleCSV } from './js/samples.js';
 import { openModal, closeModal, showCsvPreview } from './js/modal.js';
 import { syncHeaderToGrid, attachScrollSync, onColResizerMouseDown } from './js/layout.js';
 import { makeOnToggleAllClick, makeOnToggleSubsClick, makeOnToggleTasksClick,
@@ -67,7 +66,6 @@ function cmpByStartThenName(a, b){
 }
 
 // ===== DOM refs =====
-//let fileInput, sampleBtn, liveToggle, zoomSel, fitBtn, csvInput, renderBtn, dropzone;
 let fileInput, sampleBtn, liveToggle, zoomSel, fitBtn, csvInput, renderBtn;
 let headerEl, leftHead, monthRow, dayRow, labelsEl, gridEl, todayEl, previewEl, colResizer;   // v56
 
@@ -118,10 +116,6 @@ let _syncingV = false;
 
 function bindEvents(){
   // header follow width changes
-
-//  new ResizeObserver(()=>{
-//    renderHeader(daysBetween(state.model.min, state.model.max), 80);
-//  }).observe(document.getElementById('taskLabels'));
   new ResizeObserver(()=>{
     // モデル未構築時はスキップ（初回起動のエラーを回避）
     if (!state?.model?.min || !state?.model?.max) return;
@@ -141,8 +135,6 @@ export function generate(){
 // 日表示・週表示・月表示のズームイベント
 export function onZoomChange() { setZoom(zoomSel.value); render(); fixBottomSync(); }
 // モーダル開閉
-//export function openModal(){ document.body.classList.add('modal-open'); }
-//export function closeModal(){ document.body.classList.remove('modal-open'); }
 export function onModalCloseClick(){ closeModal(); }
 export function onBackdropClick(){ closeModal(); }
 export function onEscKeydown(e){ if (e.key === 'Escape') closeModal(); }
@@ -165,7 +157,7 @@ export function onFileInputChange() {
     // プレビューも最新化（安全にtryで）
     try { renderCsvPreview(csvInput?.value || ''); } catch(_) {}
     generate();
-    // ★ 同じファイルを次回選んでも change が発火するようにクリア
+    // 同じファイルを次回選んでも change が発火するようにクリア
     try { if (fileInput) fileInput.value = ''; } catch(_) {}
   }
   reader.readAsText(f);
@@ -201,16 +193,6 @@ export function onFitClick(){
   render();
   fixBottomSync();
 }
-
-/* // サンプルCSV読込みハンドラ
-export function onSampleClick(){
-  const s = sampleCSV();
-  csvInput.value = s;
-  renderCsvPreview(s);
-  generate();
-  const fi = document.getElementById('fileInput');
-  if (fi) fi.value = '';
-}*/
 
 // v68 取得CSVテキストを既存パイプラインへ投入
 function handleServerCsvText(csvText, meta) {
@@ -263,7 +245,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // v63 イベントを初期化時に起動
   initEvents({
     onZoomChange, onRenderClick, onPreviewClick,
-//    onFileInputChange, onLabelsClick, onSampleClick,
     onFileInputChange, onLabelsClick,
     onColResizerMouseDown,
     onToggleAllClick, onToggleSubsClick, onToggleTasksClick,
@@ -273,10 +254,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
 
   // modal closed at init
   document.body.classList.remove('modal-open');
-//   const s = sampleCSV();
-//   csvInput.value = s;
-//   renderCsvPreview(s);
-//   generate();
   updateGlobalButtons();   // v44
 
   // v68 保管済CSVプルダウンを初期化（ESMコールバック連携）

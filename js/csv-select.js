@@ -44,7 +44,6 @@ export async function initServerCsvPicker(opts /** @type {PickerOptions} */) {
     }
 
     setOptions(selectEl, [
-    //  { label: '(選択してください)', value: '' },
       ...merged.map(it => ({
         // 先頭に [S] をつけてサンプルを軽く識別（文言はお好みで）
         label: (it.kind === 'sample' ? '[S] ' : '') + it.name,
