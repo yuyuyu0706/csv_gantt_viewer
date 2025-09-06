@@ -377,8 +377,15 @@ export function render(){
 
   // 幅計算（右パディング込み）
   const RIGHT_PAD = 120;
-  const totalDays = daysBetween(state.model.min, state.model.max);
-  const widthPx   = totalDays * state.model.dayWidth + RIGHT_PAD;
+//  const totalDays = daysBetween(state.model.min, state.model.max);
+//  const widthPx   = totalDays * state.model.dayWidth + RIGHT_PAD;
+
+  const min = /** @type {Date} */ (state.model.min);
+  const max = /** @type {Date} */ (state.model.max);
+  const dayWidth = /** @type {number} */ (state.model.dayWidth);
+  const totalDays = daysBetween(min, max);
+  const widthPx   = totalDays * dayWidth + RIGHT_PAD;
+
   canvas.style.width = widthPx + 'px';
 
   const rowsCount = rows.length;
@@ -456,7 +463,8 @@ export function render(){
 
         // Start/End M/D
         const midY = top + catH/2;
-        appendDateLabels(bars, left, left + bw, midY, minS, maxE);
+        //appendDateLabels(bars, left, left + bw, midY, minS, maxE);
+        appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
       }
       rowIndex++;
       continue;
@@ -487,8 +495,8 @@ export function render(){
         bars.appendChild(bar);
 
         const midY = top + catH/2;
-        appendDateLabels(bars, left, left + bw, midY, minS, maxE);
-
+//        appendDateLabels(bars, left, left + bw, midY, minS, maxE);
+        appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
         // v59: 観点にも中間チェック ★M/D
         let repCheck = null;
         for (const t of (r.items || [])) {
@@ -512,7 +520,8 @@ export function render(){
 
     if (r.type === 'milestone') {
       const t = r.item;
-      const offsetDays = Math.floor((t.start - state.model.min)/86400000);
+//      const offsetDays = Math.floor((t.start - state.model.min)/86400000);
+      const offsetDays = Math.floor((t.start - min)/86400000);
       const left = offsetDays * state.model.dayWidth;
       const midY = (rowIndex * ROW_H) + (ROW_H / 2);
 
@@ -529,10 +538,15 @@ export function render(){
 
     // 通常タスクバー
     const t = r.item;
-    const offsetDays = Math.floor((t.start - state.model.min)/86400000);
+//    const offsetDays = Math.floor((t.start - state.model.min)/86400000);
+    const offsetDays = Math.floor((t.start - min)/86400000);
     const spanDays   = Math.floor((t.end   - t.start)/86400000)+1;
-    const left = offsetDays * state.model.dayWidth;
-    const bw   = Math.max(6, spanDays * state.model.dayWidth - 2);
+
+//    const left = offsetDays * state.model.dayWidth;
+//    const bw   = Math.max(6, spanDays * state.model.dayWidth - 2);
+    const left = offsetDays * dayWidth;
+    const bw   = Math.max(6, spanDays * dayWidth - 2);
+
     const barTop = (rowIndex * ROW_H + Y_PAD);
     const bar  = document.createElement('div');
     bar.className   = 'bar';
