@@ -475,6 +475,8 @@ export function render(){
   // === イナズマ線用：今日(UTC 0時)と候補格納 ===
   const __today = new Date();
   const __todayUTC0 = new Date(Date.UTC(__today.getUTCFullYear(), __today.getUTCMonth(), __today.getUTCDate()));
+
+  /** @type {{rowTop:number,rowBottom:number,midY:number,endLbl:HTMLElement,endDate:Date}[]} */
   const __zigTargets = [];
 
   for(const r of rows){
@@ -739,7 +741,7 @@ export function render(){
     }
 
     // ラベル右端（bars内相対X）を測る
-    if (!(seg.endLbl instanceof HTMLElement)) continue;
+    //if (!(seg.endLbl instanceof HTMLElement)) continue;
     const lblRect = seg.endLbl.getBoundingClientRect();
     const labelRightX = (lblRect.right - barsRect.left);
 
