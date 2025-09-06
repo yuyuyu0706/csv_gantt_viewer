@@ -463,9 +463,11 @@ export function render(){
         if(minS===null||t.start<minS) minS=t.start;
         if(maxE===null||t.end>maxE) maxE=t.end;
       }
-      if(minS && maxE){
-        const offsetDays = Math.floor((minS - min)/86400000);
-        const spanDays   = Math.floor((maxE - minS)/86400000)+1;
+      if (minS && maxE) {
+        const minSD = /** @type {Date} */ (minS);
+        const maxED = /** @type {Date} */ (maxE);
+        const offsetDays = Math.floor((minSD - min)/86400000);
+        const spanDays   = Math.floor((maxED - minSD)/86400000)+1;
         const left = offsetDays * dayWidth;
         const bw = Math.max(6, spanDays * dayWidth - 2);
         const bar=document.createElement('div');
@@ -479,7 +481,8 @@ export function render(){
 
         // Start/End M/D
         const midY = top + catH/2;
-        appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
+//        appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
+        appendDateLabels(bars, left, left + bw, midY, minSD, maxED);
       }
       rowIndex++;
       continue;
@@ -495,8 +498,10 @@ export function render(){
         if (maxE === null || t.end   > maxE) maxE = t.end;
       }
       if (minS && maxE) {
-        const offsetDays = Math.floor((minS - min)/86400000);
-        const spanDays   = Math.floor((maxE - minS)/86400000) + 1;
+        const minSD = /** @type {Date} */ (minS);
+        const maxED = /** @type {Date} */ (maxE);
+        const offsetDays = Math.floor((minSD - min)/86400000);
+        const spanDays   = Math.floor((maxED - minSD)/86400000) + 1;
         const left = offsetDays * dayWidth;
         const bw   = Math.max(6, spanDays * dayWidth - 2);
         const bar  = document.createElement('div');
@@ -510,7 +515,8 @@ export function render(){
         bars.appendChild(bar);
 
         const midY = top + catH/2;
-        appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
+//        appendDateLabels(bars, left, left + bw, midY, /** @type {Date} */(minS), /** @type {Date} */(maxE));
+        appendDateLabels(bars, left, left + bw, midY, minSD, maxED);
 
         // v59: 観点にも中間チェック ★M/D
         let repCheck = null;
