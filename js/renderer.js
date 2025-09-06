@@ -297,12 +297,18 @@ export function render(){
         if (!state.hideTaskRows) {
           for (const t of tasksInSub) {
 //            rows.push({ type:'task', cat:g.cat, item:t, displayName:t.task });
-            rows.push(/** @type {Row} */ { type:'task', cat:g.cat, item:t, displayName:t.task });
+//            rows.push(/** @type {Row} */ { type:'task', cat:g.cat, item:t, displayName:t.task });
+            rows.push(/** @type {Row} */ ({
+              type:'task', cat:g.cat, item:t,
+              displayName:String(t.task || t.name || '') }));
           }
         }
         for (const t of plainSub) {
 //          rows.push({ type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
-          rows.push(/** @type {Row} */ { type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
+//          rows.push(/** @type {Row} */ { type:'subtask', cat:g.cat, item:t, displayName:t.sub || t.name });
+          rows.push(/** @type {Row} */ ({
+            type:'subtask', cat:g.cat, item:t,
+            displayName:String(t.sub || t.name || '') }));
         }
       } else {
         for (const t of plainSub) {
@@ -335,7 +341,8 @@ export function render(){
       const n=document.createElement('div');
       n.className='label task';
       n.dataset.cat=r.cat;
-      const pp=prioClassText(r.item.priority);
+//    const pp = prioClassText(r.item.priority);
+      const pp = prioClassText(String(r.item.priority || ''));
       n.innerHTML = `<span class="name">${r.displayName || r.item.name}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       labelsEl.appendChild(n);
 
@@ -350,7 +357,8 @@ export function render(){
       const n=document.createElement('div');
       n.className='label subtask';
       n.dataset.cat=r.cat;
-      const pp=prioClassText(r.item.priority);
+//    const pp = prioClassText(r.item.priority);
+      const pp = prioClassText(String(r.item.priority || ''));
       n.innerHTML = `<span class="name">${
         r.displayName || r.item.sub || r.item.name
       }</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
