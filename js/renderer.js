@@ -246,7 +246,11 @@ export function render(){
   /** @type {Row[]} */
   const rows=[];
 
-  for(const g of state.model.groups){
+//  for(const g of state.model.groups){
+  /** @type {Array<{cat:string, items: TaskItem[]}>} */
+  const groups = /** @type {any} */ (state.model.groups || []);
+  for (const g of groups){
+
     rows.push(/** @type {Row} */ ({type:'group', cat:g.cat, items:g.items}));
     if (state.collapsedCats.has(g.cat)) continue;
 
@@ -294,7 +298,8 @@ export function render(){
       for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
 
       // 観点見出し行
-      rows.push(/** @type {Row} */ { type:'subgroup', cat:g.cat, sub:subName, key, items });
+//      rows.push(/** @type {Row} */ { type:'subgroup', cat:g.cat, sub:subName, key, items });
+      rows.push(/** @type {Row} */ ({ type:'subgroup', cat:g.cat, sub:String(subName || ''), key, items }));
 
       // 折りたたみ中なら子行なし
       if (state.collapsedSubs.has(key)) continue;
@@ -491,7 +496,8 @@ export function render(){
         const bar  = document.createElement('div');
         bar.className = 'bar subcat';   // 青バー
         bar.dataset.cat = r.cat;
-        bar.dataset.sub = r.sub;
+//        bar.dataset.sub = r.sub;
+        bar.dataset.sub = String(r.sub || '');
         const top = rowIndex*ROW_H + Math.max(0, Math.floor((ROW_H - catH)/2)) + 2;
         bar.style.left  = left + 'px';
         bar.style.width = bw   + 'px';
