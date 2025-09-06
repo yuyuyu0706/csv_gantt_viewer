@@ -308,8 +308,8 @@ export function render(){
       rows.push(/** @type {Row} */ ({
         type:'subgroup', cat:g.cat,
         sub:String(subName || ''), key,
-//        items: /** @type {TaskItem[]} */(items)
-        items
+        items: /** @type {TaskItem[]} */(items)
+//        items
       }));
 
       // 折りたたみ中なら子行なし
