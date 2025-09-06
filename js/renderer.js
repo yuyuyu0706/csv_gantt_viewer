@@ -674,8 +674,10 @@ export function render(){
     }
 
     // ラベル右端（bars内相対X）を測る
+    if (!(seg.endLbl instanceof HTMLElement)) continue;
     const lblRect = seg.endLbl.getBoundingClientRect();
     const labelRightX = (lblRect.right - barsRect.left);
+
     // 食い込み位置：ラベル右端“直外側”でピタッと止める（重なりなし）
     //  ※todayX より右へ出ないよう軽くクランプ
     const touchX = Math.max(0, Math.min(todayX - 1, labelRightX + TOUCH_GAP));
