@@ -859,18 +859,27 @@ export function renderHeader(totalDays, RIGHT_PAD){
  */
 export function fixBottomSync(){
   try{
-    const labels = document.getElementById('taskLabels');
-    const grid   = document.getElementById('ganttGrid');
-    const bars   = document.getElementById('bars');
+//    const labels = document.getElementById('taskLabels');
+//    const grid   = document.getElementById('ganttGrid');
+//    const bars   = document.getElementById('bars');
+    const labels = /** @type {HTMLElement|null} */ (document.getElementById('taskLabels'));
+    const grid   = /** @type {HTMLElement|null} */ (document.getElementById('ganttGrid'));
+    const bars   = /** @type {HTMLElement|null} */ (document.getElementById('bars'));
+
     if(!labels || !grid || !bars) return;
     const hsb = Math.max(0, grid.offsetHeight - grid.clientHeight);
     labels.style.paddingBottom = hsb + 'px';
-    let spacer = document.getElementById('bottomSpacer');
+
+//    let spacer = document.getElementById('bottomSpacer');
+    /** @type {HTMLElement|null} */
+    let spacer = /** @type {HTMLElement|null} */ (document.getElementById('bottomSpacer'));
+
     if(!spacer){
       spacer = document.createElement('div');
       spacer.id = 'bottomSpacer';
       bars.appendChild(spacer);
     }
+    if (!(spacer instanceof HTMLElement)) return;
     const need = Math.max(0, labels.scrollHeight - bars.scrollHeight);
     spacer.style.height = need + 'px';
   }catch(e){ console.error(e); }
