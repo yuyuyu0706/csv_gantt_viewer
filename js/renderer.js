@@ -505,11 +505,13 @@ export function render(){
             if (repCheck === null || t.check < repCheck) repCheck = t.check;
           }
         }
-        if (repCheck) {
+//        if (repCheck) {
+        if (repCheck instanceof Date) {
           const checkX = Math.floor((repCheck - min)/86400000) * dayWidth;
           const star = document.createElement('div');
           star.className = 'check-label';
-          star.textContent = '★ ' + fmtMD(repCheck) + '中間';
+//          star.textContent = '★ ' + fmtMD(repCheck) + '中間';
+          star.textContent = '★ ' + fmtMD(/** @type {Date} */(repCheck)) + '中間';
           star.style.left = (checkX + 0) + 'px';
           star.style.top  = (midY + 9) + 'px';
           bars.appendChild(star);
