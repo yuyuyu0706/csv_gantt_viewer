@@ -722,7 +722,9 @@ export function render(){
  * @returns {void}
  */
 export function renderHeader(totalDays, RIGHT_PAD){
-  const { monthRow, dayRow, leftHead, gridEl } = _refs();
+//  const { monthRow, dayRow, leftHead, gridEl } = _refs();
+  const { monthRow, dayRow, leftHead, gridEl, zoomSel } = _refs();
+  if (!monthRow || !dayRow || !leftHead || !gridEl) return;
 
   monthRow.innerHTML='';
   dayRow.innerHTML='';
@@ -735,15 +737,21 @@ export function renderHeader(totalDays, RIGHT_PAD){
   dayRow.style.marginLeft   = spacerW + 'px';
 
   // 可視幅を本体に合わせる
-  const grid = document.getElementById('ganttGrid');
+  /** @type {GridWithSync} */
+  //const grid = document.getElementById('ganttGrid');
+  const grid = /** @type {GridWithSync} */ (gridEl);
+
   const w = grid ? grid.scrollWidth : 0;
   if(w){
     monthRow.style.width = w + 'px';
     dayRow.style.width   = w + 'px';
   }
 
-  const zoomSel = _refs().zoomSel;
+  //const zoomSel = _refs().zoomSel;
+
+  /** @type {'day'|'week'|'month'} */
   const mode = zoomSel ? zoomSel.value : 'day';
+
   const dayWidth = state.model.dayWidth;
 
   // ガード分
@@ -815,14 +823,21 @@ export function renderHeader(totalDays, RIGHT_PAD){
   monthRow.appendChild(pad2);
 
   // ヘッダー横スクロール同期（translateXで追従）
+  /** @type {() => void} */
   const sync = ()=>{
     const x = (_refs().gridEl.scrollLeft || 0);
     monthRow.style.transform = `translateX(${-x}px)`;
     dayRow.style.transform   = `translateX(${-x}px)`;
   };
-  if (_refs().gridEl.__headerSync) _refs().gridEl.removeEventListener('scroll', _refs().gridEl.__headerSync);
-  _refs().gridEl.__headerSync = sync;
-  _refs().gridEl.addEventListener('scroll', sync, { passive: true });
+//  if (_refs().gridEl.__headerSync) _refs().gridEl.removeEventListener('scroll', _refs().gridEl.__headerSync);
+//  _refs().gridEl.__headerSync = sync;
+//  _refs().gridEl.addEventListener('scroll', sync, { passive: true });
+//  sync();
+
+  // 既存のハンドラを外してから登録（undefined を addEventListener に渡さない）
+  if (grid.__headerSync) grid.removeEventListener('scroll', grid.__headerSync);
+  grid.__headerSync = sync;
+  grid.addEventListener('scroll', sync, { passive: true });
   sync();
 }
 
@@ -855,6 +870,7 @@ export function fixBottomSync(){
  */
 function syncHeaderToGrid(){
   const { gridEl, monthRow, dayRow } = _refs();
+  if (!gridEl || !monthRow || !dayRow) return;
   const x = gridEl.scrollLeft || 0;
   monthRow.style.transform = `translateX(${-x}px)`;
   dayRow.style.transform   = `translateX(${-x}px)`;
