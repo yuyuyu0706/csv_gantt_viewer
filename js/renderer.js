@@ -805,7 +805,14 @@ export function renderHeader(totalDays, RIGHT_PAD){
   pad1.style.left=(totalDays*dayWidth)+'px';
   pad1.style.width=RIGHT_PAD+'px';
   pad1.style.height='1px';
-  const pad2 = pad1.cloneNode();
+
+//  const pad2 = pad1.cloneNode();
+  const pad2 = document.createElement('div');
+  pad2.style.position='absolute';
+  pad2.style.left=(totalDays*dayWidth)+'px';
+  pad2.style.width=RIGHT_PAD+'px';
+  pad2.style.height='1px';
+
   dayRow.appendChild(pad1);
   monthRow.appendChild(pad2);
 
