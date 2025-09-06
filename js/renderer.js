@@ -844,7 +844,9 @@ export function renderHeader(totalDays, RIGHT_PAD){
           label.style.transform='translateX(0)';
           label.textContent=(cursor.getUTCMonth()+1)+'/'+cursor.getUTCDate();
         }else{
-          label.style.left = (x + dayWidth/2) + 'px';
+          //label.style.left = (x + dayWidth/2) + 'px';
+          const lx = Number(x) + Number(dayWidth)/2;
+          label.style.left = lx + 'px';
           label.textContent=String(cursor.getUTCDate());
         }
         dayRow.appendChild(label);
@@ -864,7 +866,10 @@ export function renderHeader(totalDays, RIGHT_PAD){
         const labelDate = new Date(d0.getTime() + start*86400000);
         const label = document.createElement('div');
         label.className='label';
-        label.style.left = (start*dayWidth + span*dayWidth/2) + 'px';
+        //label.style.left = (start*dayWidth + span*dayWidth/2) + 'px';
+        const leftBase = Number(start) * Number(dayWidth);
+        const spanPx   = Number(span)  * Number(dayWidth) / 2;
+        label.style.left = (leftBase + spanPx) + 'px';
         label.textContent = `${labelDate.getUTCFullYear()}年 ${labelDate.getUTCMonth()+1}月`;
         monthRow.appendChild(label);
         start = d;
