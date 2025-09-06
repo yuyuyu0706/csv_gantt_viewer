@@ -703,6 +703,10 @@ export function renderHeader(totalDays, RIGHT_PAD){
   monthRow.innerHTML='';
   dayRow.innerHTML='';
 
+  // ローカル変数を定義
+  const min = /** @type {Date} */ (state.model.min);
+  const dayWidth = /** @type {number} */ (state.model.dayWidth);
+  
   // ラベル列ぶんだけ押し出す
   const spacerW = document.getElementById('taskLabels').offsetWidth
       || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--labels-w')) || 360;
@@ -722,7 +726,6 @@ export function renderHeader(totalDays, RIGHT_PAD){
 
   /** @type {'day'|'week'|'month'} */
   const mode = zoomSel ? zoomSel.value : 'day';
-  const dayWidth = state.model.dayWidth;
 
   // ガード分
   const GUARD_DAYS = 2;
@@ -731,7 +734,7 @@ export function renderHeader(totalDays, RIGHT_PAD){
   monthRow.style.width = headerWidth + 'px';
 
   // 日/週/月 目盛り（境界のみ）
-  let cursor = new Date(state.model.min);
+  let cursor = new Date(min);
   for(let d=0; d<=totalDays + GUARD_DAYS; d++){
     const x=d*dayWidth;
     if(d < totalDays + GUARD_DAYS){
@@ -765,7 +768,7 @@ export function renderHeader(totalDays, RIGHT_PAD){
 
   // 月ラベル（dayのみ年+月、他は省略）
   if(mode!=='month'){
-    let d0 = new Date(state.model.min), start = 0;
+    let d0 = new Date(min), start = 0;
     for(let d=0; d<=totalDays + GUARD_DAYS; d++){
       const d1 = new Date(d0.getTime() + d*86400000);
       const monthChanged = (d === totalDays + GUARD_DAYS) || (d1.getUTCDate() === 1);
