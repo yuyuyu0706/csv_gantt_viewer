@@ -310,10 +310,12 @@ export function render(){
       for (const it of /** @type {TaskItem[]} */ (sb.items || [])) { if (it.task) { withTask = true; break; } }
 
       // 観点見出し行
-      rows.push(/** @type {Row} */ ({
+//      rows.push(/** @type {Row} */ ({
+      rows.push(/** @type {SubGroupRow} */ ({
         type:'subgroup', cat:g.cat,
         sub:String(subName || ''), key,
-        items: /** @type {TaskItem[]} */(sb.items || [])
+        items: (sb.items || [])
+//        items: /** @type {TaskItem[]} */(sb.items || [])
 //        items: /** @type {TaskItem[]} */(items)
 //        items
       }));
