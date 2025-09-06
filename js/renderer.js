@@ -803,14 +803,15 @@ export function render(){
 export function renderHeader(totalDays, RIGHT_PAD){
   const { monthRow, dayRow, leftHead, gridEl, zoomSel } = _refs();
   if (!monthRow || !dayRow || !leftHead || !gridEl) return;
-  if (!state.model || !(state.model.min instanceof Date)) return;
+//  if (!state.model || !(state.model.min instanceof Date)) return;
+  if (!state.model || !state.model.min) return;
 
   monthRow.innerHTML='';
   dayRow.innerHTML='';
 
   // ローカル変数を定義
-//  const min = /** @type {Date} */ (state.model.min);
-  const min = state.model.min;
+  const min = /** @type {Date} */ (state.model.min);
+//  const min = state.model.min;
 //  const dayWidth = /** @type {number} */ (state.model.dayWidth);
   const dayWidth = Number(state.model.dayWidth);
   const grid = /** @type {GridWithSync} */ (gridEl);
