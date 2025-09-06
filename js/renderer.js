@@ -253,17 +253,25 @@ export function render(){
     }
 
     // 観点ごとにグループ化
+//    const bySub = new Map();
+//    for(const t of g.items){
+
+    /** @type {Map<string, TaskItem[]>} */
     const bySub = new Map();
-    for(const t of g.items){
+    for (const t of g.items){
       const key = (t.sub || '(なし)');
       if(!bySub.has(key)) bySub.set(key, []);
       bySub.get(key).push(t);
     }
 
     // v49: 観点の最小開始日で並べ替え
+//    const subsArr = Array.from(bySub.entries()).map(([subName, items]) => {
     const subsArr = Array.from(bySub.entries()).map(([subName, items]) => {
+      /** @type {Date|null} */
+
       let minS = null;
-      for (const it of items) {
+      for (const it of /** @type {TaskItem[]} */(items)) {
+//      for (const it of items) {
         if (!it.start) continue;
         if (minS === null || it.start < minS) minS = it.start;
       }
@@ -278,8 +286,9 @@ export function render(){
     // rows 構築
     for (const { subName, items } of subsArr) {
       const key = `${g.cat}::${subName}`;
-      const withTask = items.some(it => it.task);
-
+//      const withTask = items.some(it => it.task);
+      let withTask = false;
+      for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
       // 観点見出し行
       rows.push({ type:'subgroup', cat:g.cat, sub:subName, key, items });
 
@@ -287,9 +296,10 @@ export function render(){
       if (state.collapsedSubs.has(key)) continue;
 
       // v50: 観点内も開始日→終了日→名前で安定ソート
-      const tasksInSub = items.filter(it => it.task).slice().sort(cmpByStartThenName);
-      const plainSub   = items.filter(it => !it.task).slice().sort(cmpByStartThenName);
-
+//      const tasksInSub = items.filter(it => it.task).slice().sort(cmpByStartThenName);
+//      const plainSub   = items.filter(it => !it.task).slice().sort(cmpByStartThenName);
+      const tasksInSub = /** @type {TaskItem[]} */ (items.filter((it)=> !!it.task)).slice().sort(cmpByStartThenName);
+      const plainSub   = /** @type {TaskItem[]} */ (items.filter((it)=> !it.task)).slice().sort(cmpByStartThenName);
       if (withTask) {
         if (!state.hideTaskRows) {
           for (const t of tasksInSub) {
@@ -351,9 +361,17 @@ export function render(){
   }
 
   //const canvas   = _refs().canvas;
-  const linesWrap= canvas.querySelector('.grid-lines');
-  const bars     = canvas.querySelector('#bars');
-  const todayEl  = canvas.querySelector('#todayLine');
+//  const linesWrap= canvas.querySelector('.grid-lines');
+//  const bars     = canvas.querySelector('#bars');
+//  const todayEl  = canvas.querySelector('#todayLine');
+
+  const linesWrapEl = canvas.querySelector('.grid-lines');
+  const barsEl      = canvas.querySelector('#bars');
+  const todayEl     = _refs().todayEl; // id で取得したものを利用
+  if (!(linesWrapEl instanceof HTMLElement) || !(barsEl instanceof HTMLElement)) return;
+  const linesWrap = linesWrapEl;
+  const bars = barsEl;
+
   linesWrap.innerHTML='';
   bars.innerHTML='';
 
