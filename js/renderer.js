@@ -311,14 +311,27 @@ export function render(){
 
       // 観点見出し行
 //      rows.push(/** @type {Row} */ ({
-      rows.push(/** @type {SubGroupRow} */ ({
-        type:'subgroup', cat:g.cat,
-        sub:String(subName || ''), key,
-        items: (sb.items || [])
+//      rows.push(/** @type {SubGroupRow} */ ({
+//        type:'subgroup', cat:g.cat,
+//        sub:String(subName || ''), key,
+//        items: (sb.items || [])
 //        items: /** @type {TaskItem[]} */(sb.items || [])
 //        items: /** @type {TaskItem[]} */(items)
 //        items
-      }));
+//      }));
+
+      // 観点見出し行（items を確定的に TaskItem[] にしてから push）
+      /** @type {TaskItem[]} */
+      const subItems = /** @type {TaskItem[]} */ (sb.items || []);
+      /** @type {SubGroupRow} */
+      const subRow = {
+        type: 'subgroup',
+        cat: g.cat,
+        sub: String(subName || ''),
+        key,
+        items: subItems,
+      };
+      rows.push(subRow);
 
       // 折りたたみ中なら子行なし
       if (state.collapsedSubs.has(key)) continue;
