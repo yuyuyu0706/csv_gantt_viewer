@@ -595,7 +595,8 @@ export function render(){
     bar.style.left  = left+'px';
     bar.style.width = bw+'px';
     bar.style.top   = (rowIndex*ROW_H + Y_PAD)+'px';
-    const color     = statusColor(t.status);
+//    const color     = statusColor(t.status);
+    const color     = statusColor(String(t.status || ''));
     bar.style.background = color;
 
     if(color==='#ffffff'){
