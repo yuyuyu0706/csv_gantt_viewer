@@ -2,6 +2,28 @@
 // @ts-check
 
 /**
+ * @typedef {Object} TaskItem
+ * @property {string=} task
+ * @property {string=} sub
+ * @property {string=} name
+ * @property {Date=}   start
+ * @property {Date=}   end
+ * @property {Date=}   check
+ * @property {string=} status
+ * @property {string=} priority
+ * @property {string=} taskNo
+ * /
+
+/**
+ * @typedef {{type:'group',    cat:string, items: TaskItem[]}}    GroupRow
+ * @typedef {{type:'subgroup', cat:string, sub:string, key:string, items: TaskItem[]}} SubGroupRow
+ * @typedef {{type:'task',     cat:string, item: TaskItem, displayName:string}}        TaskRow
+ * @typedef {{type:'subtask',  cat:string, item: TaskItem, displayName:string}}        SubtaskRow
+ * @typedef {{type:'milestone',cat:string, item: TaskItem, displayName:string}}        MilestoneRow
+ * @typedef {GroupRow|SubGroupRow|TaskRow|SubtaskRow|MilestoneRow} Row
+ */
+
+/**
  * Gantt Chart のレンダリングモジュール
  * 
  * 主な機能:
@@ -22,7 +44,8 @@ import { updateToggleAllBtn, updateGlobalButtons } from './toggles.js';
  * @param {string} p 優先度文字列（例: "高", "緊急"）
  * @returns {[string, string]} CSSクラス名と表示テキスト
  */
- 
+
+/** @type {(p:string)=>[string,string]} */
 const prioClassText = (window.prioClassText) ? window.prioClassText : function(p){
   const v=(p||'').trim();
   if(v==='緊急') return ['urgent','緊急'];
@@ -37,7 +60,8 @@ const prioClassText = (window.prioClassText) ? window.prioClassText : function(p
  * @param {string} s ステータス文字列
  * @returns {string} カラーコード
  */
- 
+
+/** @type {(s:string)=>string} */
 const statusColor = (window.statusColor) ? window.statusColor : function(s){
   const v=String(s||'').replace(/[　]/g,' ').trim();
   if(v==='完了済み') return '#bdbdbd';
@@ -56,7 +80,8 @@ const statusColor = (window.statusColor) ? window.statusColor : function(s){
  * @param {Date} startDate 開始日
  * @param {Date} endDate 終了日
  */
- 
+
+/** @type {(containerEl:HTMLElement,startX:number,endX:number,midY:number,startDate:Date,endDate:Date)=>void} */
 const appendDateLabels = (window.appendDateLabels) ? window.appendDateLabels : function(containerEl, startX, endX, midY, startDate, endDate) {
   const s = document.createElement('div');
   s.className = 'date-label start';
@@ -79,7 +104,8 @@ const appendDateLabels = (window.appendDateLabels) ? window.appendDateLabels : f
  * @param {object} b タスクオブジェクト
  * @returns {number} 比較結果
  */
- 
+
+/** @type {(a:TaskItem,b:TaskItem)=>number} */
 const cmpByStartThenName = (window.cmpByStartThenName) ? window.cmpByStartThenName : function(a, b){
   const ax = a?.start ? a.start.getTime() : Infinity;
   const bx = b?.start ? b.start.getTime() : Infinity;
@@ -98,6 +124,8 @@ const cmpByStartThenName = (window.cmpByStartThenName) ? window.cmpByStartThenNa
  * @param {'day'|'week'|'month'} mode ズームモード
  * @returns {boolean} true: 境界に該当
  */
+
+/** @type {(d:Date,mode:'day'|'week'|'month')=>boolean} */
  const __isBoundary = (window.__isBoundary) ? window.__isBoundary : function(d,mode){
   if(mode==='day')   return true;
   if(mode==='week')  return d.getUTCDay()===0;
