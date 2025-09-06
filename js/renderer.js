@@ -158,7 +158,7 @@ function _depthOfTaskNo(taskNo) {
 
 /**
  * 孫タスクかどうか判定する
- * @param {object} t タスクオブジェクト
+ * @param {TaskItem} t タスクオブジェクト
  * @returns {boolean} 孫タスクならtrue
  */
 function _isGrandchildTask(t) {
@@ -167,7 +167,7 @@ function _isGrandchildTask(t) {
 
 /**
  * ステータスが「完了済み」か判定する
- * @param {object} t タスクオブジェクト
+ * @param {TaskItem} t タスクオブジェクト
  * @returns {boolean} 完了済みならtrue
  */
 function _isDoneStatus(t) {
@@ -176,7 +176,7 @@ function _isDoneStatus(t) {
 
 /**
  * 孫タスクのうち未完了かつ終了日が今日より前の最も近い日を返す
- * @param {Array<object>} tasks タスク配列
+ * @param {TaskItem[]} tasks タスク配列
  * @param {Date} todayUTC0 今日(UTC)の00:00
  * @returns {Date|null} スナップ対象の日付
  */
