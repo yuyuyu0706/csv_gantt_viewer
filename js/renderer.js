@@ -480,8 +480,12 @@ export function render(){
       if (minS && maxE) {
         const minSD = /** @type {Date} */ (minS);
         const maxED = /** @type {Date} */ (maxE);
-        const offsetDays = Math.floor((minSD - min)/86400000);
-        const spanDays   = Math.floor((maxED - minSD)/86400000)+1;
+
+        //const offsetDays = Math.floor((minSD - min)/86400000);
+        //const spanDays   = Math.floor((maxED - minSD)/86400000)+1;
+        const offsetDays = Math.floor((minSD.getTime() - min.getTime())/86400000);
+        const spanDays   = Math.floor((maxED.getTime() - minSD.getTime())/86400000)+1;
+
         const left = offsetDays * dayWidth;
         const bw = Math.max(6, spanDays * dayWidth - 2);
         const bar=document.createElement('div');
@@ -514,8 +518,10 @@ export function render(){
       if (minS && maxE) {
         const minSD = /** @type {Date} */ (minS);
         const maxED = /** @type {Date} */ (maxE);
-        const offsetDays = Math.floor((minSD - min)/86400000);
-        const spanDays   = Math.floor((maxED - minSD)/86400000) + 1;
+        //const offsetDays = Math.floor((minSD - min)/86400000);
+        //const spanDays   = Math.floor((maxED - minSD)/86400000) + 1;
+        const offsetDays = Math.floor((minSD.getTime() - min.getTime())/86400000);
+        const spanDays   = Math.floor((maxED.getTime() - minSD.getTime())/86400000)+1;
         const left = offsetDays * dayWidth;
         const bw   = Math.max(6, spanDays * dayWidth - 2);
         const bar  = document.createElement('div');
@@ -540,7 +546,8 @@ export function render(){
           }
         }
         if (repCheck instanceof Date) {
-          const checkX = Math.floor((repCheck - min)/86400000) * dayWidth;
+//          const checkX = Math.floor((repCheck - min)/86400000) * dayWidth;
+          const checkX = Math.floor((repCheck.getTime() - min.getTime())/86400000) * dayWidth
           const star = document.createElement('div');
           star.className = 'check-label';
           star.textContent = '★ ' + fmtMD(/** @type {Date} */(repCheck)) + '中間';
@@ -556,7 +563,8 @@ export function render(){
     if (r.type === 'milestone') {
       const t = r.item;
       if (!(t.start instanceof Date)) { rowIndex++; continue; }
-      const offsetDays = Math.floor((t.start - min)/86400000);
+//      const offsetDays = Math.floor((t.start - min)/86400000);
+      const offsetDays = Math.floor((t.start.getTime() - min.getTime())/86400000);
       const left = offsetDays * dayWidth;
       const midY = (rowIndex * ROW_H) + (ROW_H / 2);
 
@@ -574,8 +582,10 @@ export function render(){
     // 通常タスクバー
     const t = r.item;
     if (!(t.start instanceof Date) || !(t.end instanceof Date)) { rowIndex++; continue; }
-    const offsetDays = Math.floor((t.start - min)/86400000);
-    const spanDays   = Math.floor((t.end   - t.start)/86400000)+1;
+    //const offsetDays = Math.floor((t.start - min)/86400000);
+    //const spanDays   = Math.floor((t.end   - t.start)/86400000)+1;
+    const offsetDays = Math.floor((t.start.getTime() - min.getTime())/86400000);
+    const spanDays   = Math.floor((t.end.getTime() - t.start.getTime())/86400000)+1;
     const left = offsetDays * dayWidth;
     const bw   = Math.max(6, spanDays * dayWidth - 2);
 
@@ -667,7 +677,8 @@ export function render(){
     .sort((a,b)=> a.rowTop - b.rowTop);
 
   // 1) 今日の X（表示範囲外なら描かない）
-  const todayDaysFromMin = Math.floor((__todayUTC0 - min)/86400000);
+  //const todayDaysFromMin = Math.floor((__todayUTC0 - min)/86400000);
+  const todayDaysFromMin = Math.floor((__todayUTC0.getTime() - min.getTime())/86400000);
   const todayX = todayDaysFromMin * dayWidth;
   const canvasWidth = canvas.offsetWidth || widthPx;
   if (todayX < 0 || todayX > canvasWidth) { if (todayEl) todayEl.hidden = true; }
