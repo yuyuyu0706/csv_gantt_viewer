@@ -295,20 +295,26 @@ export function render(){
     // rows 構築
 //    for (const { subName, items } of subsArr) {
 //      const key = `${g.cat}::${subName}`;
+//    for (const sb of subsArr) {
+//      const subName = sb.subName;
+//      /** @type {TaskItem[]} */
+//      const items = sb.items;  // ← ここで確実に TaskItem[] に固定
+//      const key = `${g.cat}::${subName}`;
+
     for (const sb of subsArr) {
       const subName = sb.subName;
-      /** @type {TaskItem[]} */
-      const items = sb.items;  // ← ここで確実に TaskItem[] に固定
       const key = `${g.cat}::${subName}`;
 
       let withTask = false;
-      for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
+      //for (const it of /** @type {TaskItem[]} */ (items)) { if (it.task) { withTask = true; break; } }
+      for (const it of /** @type {TaskItem[]} */ (sb.items || [])) { if (it.task) { withTask = true; break; } }
 
       // 観点見出し行
       rows.push(/** @type {Row} */ ({
         type:'subgroup', cat:g.cat,
         sub:String(subName || ''), key,
-        items: /** @type {TaskItem[]} */(items)
+        items: /** @type {TaskItem[]} */(sb.items || [])
+//        items: /** @type {TaskItem[]} */(items)
 //        items
       }));
 
@@ -316,8 +322,11 @@ export function render(){
       if (state.collapsedSubs.has(key)) continue;
 
       // v50: 観点内も開始日→終了日→名前で安定ソート
-      const tasksInSub = /** @type {TaskItem[]} */ (items.filter((it)=> !!it.task)).slice().sort(cmpByStartThenName);
-      const plainSub   = /** @type {TaskItem[]} */ (items.filter((it)=> !it.task)).slice().sort(cmpByStartThenName);
+      //const tasksInSub = /** @type {TaskItem[]} */ (items.filter((it)=> !!it.task)).slice().sort(cmpByStartThenName);
+      //const plainSub   = /** @type {TaskItem[]} */ (items.filter((it)=> !it.task)).slice().sort(cmpByStartThenName);
+      const tasksInSub = /** @type {TaskItem[]} */ ((sb.items || []).filter((it)=> !!it.task)).slice().sort(cmpByStartThenName);
+      const plainSub   = /** @type {TaskItem[]} */ ((sb.items || []).filter((it)=> !it.task)).slice().sort(cmpByStartThenName);
+
       if (withTask) {
         if (!state.hideTaskRows) {
           for (const t of tasksInSub) {
