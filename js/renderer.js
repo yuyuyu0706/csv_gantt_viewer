@@ -634,11 +634,16 @@ export function render(){
     .sort((a,b)=> a.rowTop - b.rowTop);
 
   // 1) 今日の X（表示範囲外なら描かない）
-  const todayDaysFromMin = Math.floor((__todayUTC0 - state.model.min)/86400000);
-  const todayX = todayDaysFromMin * state.model.dayWidth;
-  if (todayX < 0 || todayX > canvas.offsetWidth) {
-    todayEl.hidden = true;
-  }
+//  const todayDaysFromMin = Math.floor((__todayUTC0 - state.model.min)/86400000);
+//  const todayX = todayDaysFromMin * state.model.dayWidth;
+//  if (todayX < 0 || todayX > canvas.offsetWidth) {
+//    todayEl.hidden = true;
+//  }
+
+  const todayDaysFromMin = Math.floor((__todayUTC0 - min)/86400000);
+  const todayX = todayDaysFromMin * dayWidth;
+  const canvasWidth = canvas.offsetWidth || widthPx;
+  if (todayX < 0 || todayX > canvasWidth) { if (todayEl) todayEl.hidden = true; }
 
   // 2) 既存縦線は隠す（重複を避ける）
   if (todayEl) todayEl.hidden = true;
