@@ -689,14 +689,24 @@ export function render(){
   if (todayEl) todayEl.hidden = true;
 
   // 3) 旧イナズマを消去 → 新規 SVG 追加（ラベルが上に出るよう z-index を低めに）
-  let lightning = canvas.querySelector('#todayLightning');
-  if (lightning) lightning.remove();
-  lightning = document.createElementNS('http://www.w3.org/2000/svg','svg');
+//  let lightning = canvas.querySelector('#todayLightning');
+//  if (lightning) lightning.remove();
+//  lightning = document.createElementNS('http://www.w3.org/2000/svg','svg');
+
+  const oldLightning = canvas.querySelector('#todayLightning');
+  if (oldLightning) oldLightning.remove();
+
+  /** @type {SVGSVGElement} */
+  const lightning = /** @type {any} */(
+    document.createElementNS('http://www.w3.org/2000/svg','svg')
+  );
+
   lightning.setAttribute('id','todayLightning');
   lightning.setAttribute('width','100%');
   lightning.setAttribute('height', contentH + 'px');
   lightning.style.position='absolute';
-  lightning.style.left='0'; lightning.style.top='0';
+  lightning.style.left='0';
+  lightning.style.top='0';
   lightning.style.pointerEvents='none';
   lightning.style.overflow='visible';
   lightning.style.zIndex = '1';   // ← ラベルより下
