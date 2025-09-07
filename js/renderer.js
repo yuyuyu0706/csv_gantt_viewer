@@ -376,8 +376,9 @@ export function render(){
       n.className='label task';
       n.dataset.cat=r.cat;
       const pp = prioClassText(String(r.item.priority || ''));
+      const color = statusColor(String(r.item.status || ''));
       const assignee = String(r.item.assignee || '').trim();
-      const assigneeHtml = assignee ? `<span class="assignee">${assignee}</span>` : '';
+      const assigneeHtml = assignee ? `<span class="assignee" style="color:${color}">${assignee}</span>` : '';
       n.innerHTML = `<span class="name">${assigneeHtml}${String(r.displayName || r.item.name || '')}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       labelsEl.appendChild(n);
 
@@ -393,8 +394,9 @@ export function render(){
       n.className='label subtask';
       n.dataset.cat=r.cat;
       const pp = prioClassText(String(r.item.priority || ''));
+      const color = statusColor(String(r.item.status || ''));
       const assignee = String(r.item.assignee || '').trim();
-      const assigneeHtml = assignee ? `<span class="assignee">${assignee}</span>` : '';
+      const assigneeHtml = assignee ? `<span class="assignee" style="color:${color}">${assignee}</span>` : '';
       n.innerHTML = `<span class="name">${assigneeHtml}${
         r.displayName || r.item.sub || r.item.name
       }</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
