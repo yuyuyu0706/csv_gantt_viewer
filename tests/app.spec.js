@@ -8,7 +8,9 @@ const sampleCsvPath = path.join(__dirname, '..', 'csv', 'sample.csv');
 
 test('renders bars from sample CSV', async ({ page }) => {
   await page.goto('/');
-  await page.waitForSelector('#csvInput');
+  // CSV入力モーダルを開いてテキストエリアを表示
+  await page.click('#previewBtn');
+  await page.waitForSelector('#csvInput', { state: 'visible' });
   const csv = await fs.readFile(sampleCsvPath, 'utf-8');
   await page.fill('#csvInput', csv);
   await page.click('#renderBtn');
