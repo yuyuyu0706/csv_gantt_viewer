@@ -230,6 +230,8 @@ window.addEventListener('DOMContentLoaded', ()=>{
   previewEl = document.getElementById('csvPreview');
   bindEvents();
   attachScrollSync();
+  // 初期レンダリング前にヘッダとグリッドの水平同期を設定
+  syncHeaderToGrid();
 
   // v64 依存注入で“完成したハンドラ”を作る
   const onToggleAllClick  = makeOnToggleAllClick({
