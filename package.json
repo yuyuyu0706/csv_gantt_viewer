@@ -1,0 +1,11 @@
+{
+  "name": "csv_gantt_viewer",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.42.1"
+  }
+}
