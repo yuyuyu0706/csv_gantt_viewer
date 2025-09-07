@@ -376,7 +376,9 @@ export function render(){
       n.className='label task';
       n.dataset.cat=r.cat;
       const pp = prioClassText(String(r.item.priority || ''));
-      n.innerHTML = `<span class="name">${String(r.displayName || r.item.name || '')}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
+      const assignee = String(r.item.assignee || '').trim();
+      const assigneeHtml = assignee ? `<span class="assignee">${assignee}</span>` : '';
+      n.innerHTML = `<span class="name">${assigneeHtml}${String(r.displayName || r.item.name || '')}</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       labelsEl.appendChild(n);
 
     } else if (r.type === 'milestone') {
