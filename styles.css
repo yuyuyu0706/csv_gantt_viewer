@@ -85,7 +85,7 @@ textarea#csvInput{width:100%;height:220px;background:var(--code-bg);border:1px s
 .task-labels .label.task .assignee{
   display:inline-block;
   font-size:9px;
-  background:#fff;
+  color:#000;
   border:1px solid currentColor;
   border-radius:4px;
   padding:1px 4px;
