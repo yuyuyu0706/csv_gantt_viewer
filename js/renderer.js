@@ -11,6 +11,7 @@
  * @property {Date=}   check
  * @property {string=} status
  * @property {string=} priority
+ * @property {string=} assignee
  * @property {string=} taskNo
  */
 
@@ -390,7 +391,9 @@ export function render(){
       n.className='label subtask';
       n.dataset.cat=r.cat;
       const pp = prioClassText(String(r.item.priority || ''));
-      n.innerHTML = `<span class="name">${
+      const assignee = String(r.item.assignee || '').trim();
+      const assigneeHtml = assignee ? `<span class="assignee">${assignee}</span>` : '';
+      n.innerHTML = `<span class="name">${assigneeHtml}${
         r.displayName || r.item.sub || r.item.name
       }</span><span class="prio ${pp[0]}">${pp[1]}</span>`;
       labelsEl.appendChild(n);
