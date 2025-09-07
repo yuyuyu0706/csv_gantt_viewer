@@ -75,7 +75,12 @@ textarea#csvInput{width:100%;height:220px;background:var(--code-bg);border:1px s
 .task-labels .label{display:grid;grid-template-columns:1fr 90px;border-bottom:1px solid var(--border);padding:6px 8px;align-items:center;gap:8px;height:var(--row-h);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .task-labels .label.group{font-weight:700;background:#eef6f0;color:#144e35}
 .task-labels .label.subtask{padding-left:20px}
-.task-labels .label .name{display:flex;align-items:center}
+.task-labels .label .name{
+  display:flex;
+  align-items:center;
+  position:relative;
+  top:-2px;
+}
 .task-labels .label.subtask .assignee,
 .task-labels .label.task .assignee{
   display:inline-block;
@@ -109,7 +114,16 @@ textarea#csvInput{width:100%;height:220px;background:var(--code-bg);border:1px s
  }
 .bars{position:relative}
 .bar{position:absolute;height:var(--bar-h);border-radius:8px;box-shadow:0 1px 0 rgba(0,0,0,.05), inset 0 1px 0 rgba(255,255,255,.5);display:flex;align-items:center;border:1px solid transparent}
-.bar .name{font-size:12px;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#0b3b2a}
+.bar .name{
+  position:relative;
+  top:-2px;
+  font-size:12px;
+  padding:0 6px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  color:#0b3b2a;
+}
 .bar.cat{background:#424242;border-color:#424242;height:var(--cat-bar-h);border-radius:6px}
 
 /* Footer */
