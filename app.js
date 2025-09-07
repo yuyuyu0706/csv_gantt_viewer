@@ -120,7 +120,7 @@ function bindEvents(){
     // モデル未構築時はスキップ（初回起動のエラーを回避）
     if (!state?.model?.min || !state?.model?.max) return;
     const span = Math.max(1, daysBetween(state.model.min, state.model.max));
-    renderHeader(span, 80);
+    renderHeader(span, 120);
   }).observe(document.getElementById('taskLabels'));
 }
 

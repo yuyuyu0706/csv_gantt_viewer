@@ -768,11 +768,14 @@ export function renderHeader(totalDays, RIGHT_PAD){
 
   // ラベル列ぶんだけ押し出す
   const labelsRoot = document.getElementById('taskLabels');
-  const spacerW = (labelsRoot ? labelsRoot.offsetWidth : 0)
+  const resizer    = document.getElementById('colResizer');
+  const labelsW = (labelsRoot ? labelsRoot.offsetWidth : 0)
       || parseInt(getComputedStyle(document.documentElement).getPropertyValue('--labels-w')) || 360;
-  leftHead.style.width = spacerW + 'px';
-  monthRow.style.marginLeft = spacerW + 'px';
-  dayRow.style.marginLeft   = spacerW + 'px';
+  const resizerW = resizer ? resizer.offsetWidth : 0;
+  const offset = labelsW + resizerW;
+  leftHead.style.width = labelsW + 'px';
+  monthRow.style.marginLeft = offset + 'px';
+  dayRow.style.marginLeft   = offset + 'px';
 
   // 可視幅を本体に合わせる
   const w = grid ? grid.scrollWidth : 0;
