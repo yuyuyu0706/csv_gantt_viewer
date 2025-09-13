@@ -479,7 +479,7 @@ export function render(){
   const __today = new Date();
   const __todayUTC0 = new Date(Date.UTC(__today.getUTCFullYear(), __today.getUTCMonth(), __today.getUTCDate()));
 
-  /** @type {{rowTop:number,rowBottom:number,midY:number,startX:number,startDate:Date}[]} */
+  /** @type {{rowTop:number,rowBottom:number,midY:number,date:Date,startX?:number,endLbl?:HTMLElement,type:'start'|'end'}[]} */
   const __zigTargets = [];
 
   for(const r of rows){
@@ -629,18 +629,27 @@ export function render(){
     bars.appendChild(startLbl);
     bars.appendChild(endLbl);
 
-    // --- イナズマ対象：孫タスク(= t.task あり) & 開始前 & Start<今日 の Start位置を記録 ---
+    // --- イナズマ対象：孫タスク(= t.task あり)で未完了/開始前の Start/End 位置を記録 ---
     const isLeaf = (r.type === 'task' || r.type === 'subtask');
     if (isLeaf) {
       const st = String(t.status || '').replace(/[　]/g,' ').trim();
       if (st === '開始前' && (t.start instanceof Date)) {
-        // 今日(UTC0)より前かは後段でまとめて判定する。ここでは開始位置を保持。
         __zigTargets.push({
+          type: 'start',
           rowTop: (rowIndex * ROW_H),
           rowBottom: (rowIndex * ROW_H) + ROW_H,
           midY: barTop + ((parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || BAR_H) / 2),
           startX: left,
-          startDate: t.start,
+          date: t.start,
+        });
+      } else if (st !== '完了済み' && (t.end instanceof Date)) {
+        __zigTargets.push({
+          type: 'end',
+          rowTop: (rowIndex * ROW_H),
+          rowBottom: (rowIndex * ROW_H) + ROW_H,
+          midY: barTop + ((parseInt(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || BAR_H) / 2),
+          endLbl,
+          date: t.end,
         });
       }
     }
@@ -671,10 +680,10 @@ export function render(){
   updateToggleAllBtn();
   updateGlobalButtons();
 
-  // === 今日“イナズマ線”（Start 位置へ“食い込む”） ======================
+  // === 今日“イナズマ線”（Start/End 位置へ“食い込む”） ======================
   // 0) 事前準備（ターゲット整列） — ※ __todayUTC0 は上部で一度だけ定義済みを再利用
   const targets = (__zigTargets || [])
-    .filter(x => (x.startDate instanceof Date) && x.startDate < __todayUTC0)
+    .filter(x => (x.date instanceof Date) && x.date < __todayUTC0)
     .sort((a,b)=> a.rowTop - b.rowTop);
 
   // 1) 今日の X（表示範囲外なら描かない）
@@ -707,8 +716,10 @@ export function render(){
   bars.appendChild(lightning);
 
   // 4) ベジェで“なめらか”に食い込むパスを構築
-  //    縦に降りて、対象行では： todayX → (行上端+R) → Q(丸め) → [startX] → Q → (行下端-R) → todayX
+  //    縦に降りて、対象行では： todayX → (行上端+R) → Q(丸め) → [startX or labelRightX+bite] → Q → (行下端-R) → todayX
   const R = 8;         // カーブ半径
+  const TOUCH_GAP = 1;  // ラベル“手前”で止めるギャップ(px)
+  const barsRect = bars.getBoundingClientRect();
   const parts = [];
   let cursorY = 0;
   parts.push(`M ${Math.round(todayX)} ${0}`);
@@ -721,9 +732,16 @@ export function render(){
       parts.push(`L ${Math.round(todayX)} ${Math.round(topY + Math.min(R, (botY-topY)/2))}`);
     }
 
-    const startX = seg.startX;
     const midY  = Math.round(seg.midY);
-    const touchX = Math.max(0, Math.min(todayX - 1, startX));
+    let touchX;
+    if (seg.type === 'start') {
+      const startX = seg.startX || 0;
+      touchX = Math.max(0, Math.min(todayX - 1, startX));
+    } else {
+      const lblRect = seg.endLbl.getBoundingClientRect();
+      const labelRightX = (lblRect.right - barsRect.left);
+      touchX = Math.max(0, Math.min(todayX - 1, labelRightX + TOUCH_GAP));
+    }
 
     // Qベジェで滑らかに左へ → さらに戻る
     parts.push(`Q ${Math.round(todayX)} ${midY} ${Math.round(touchX)} ${midY}`);
