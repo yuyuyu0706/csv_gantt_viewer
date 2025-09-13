@@ -738,8 +738,8 @@ export function render(){
       const startX = seg.startX || 0;
       touchX = Math.max(0, Math.min(todayX - 1, startX));
     } else {
-      const lblRect = seg.endLbl.getBoundingClientRect();
-      const labelRightX = (lblRect.right - barsRect.left);
+      const lblRect = seg.endLbl?.getBoundingClientRect();
+      const labelRightX = lblRect ? (lblRect.right - barsRect.left) : 0;
       touchX = Math.max(0, Math.min(todayX - 1, labelRightX + TOUCH_GAP));
     }
 
