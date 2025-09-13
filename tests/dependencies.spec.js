@@ -5,7 +5,7 @@ import { loadSampleCsv } from './utils.js';
 
 test('renders dependency lines', async ({ page }) => {
   await loadSampleCsv(page);
-  await page.waitForSelector('#bars svg.deps path');
-  const depCount = await page.locator('#bars svg.deps path').count();
+  await page.waitForSelector('#bars svg.deps > path');
+  const depCount = await page.locator('#bars svg.deps > path').count();
   expect(depCount).toBeGreaterThan(0);
 });
