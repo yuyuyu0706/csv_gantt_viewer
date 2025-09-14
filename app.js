@@ -190,7 +190,11 @@ export function onFitClick(){
   const containerWidth = (grid && grid.clientWidth) ? grid.clientWidth : 800;
   const totalDays = daysBetween(state.model.min, state.model.max);
   const RIGHT_PAD = 120;
-  state.model.dayWidth = Math.max(4, Math.floor((containerWidth - RIGHT_PAD) / totalDays));
+  // Fit canvas width within container by reducing day width when necessary.
+  // Use at least 1px per day to avoid zero or negative widths when
+  // the container is very narrow compared to the total span of days.
+  const fitDayWidth = Math.floor((containerWidth - RIGHT_PAD) / totalDays);
+  state.model.dayWidth = fitDayWidth > 0 ? fitDayWidth : 1;
   render();
   fixBottomSync();
 }
