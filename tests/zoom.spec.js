@@ -11,8 +11,8 @@ test('switches to week view without layout issues', async ({ page }) => {
   const labelText = await page.locator('#dayRow .label').first().textContent();
   expect(labelText).toMatch(/\d+\/\d+/);
 
-  const barBox = await page.locator('#bars .bar').first().boundingBox();
-  const labelBox = await page.locator('#taskLabels .label').first().boundingBox();
+  const barBox = await page.locator('#bars .bar:not(.cat):not(.subcat)').first().boundingBox();
+  const labelBox = await page.locator('#taskLabels .label.task').first().boundingBox();
   const barsTop = await page.locator('#bars').boundingBox();
   const labelsTop = await page.locator('#taskLabels').boundingBox();
   expect(barBox?.width || 0).toBeGreaterThan(0);
@@ -30,8 +30,8 @@ test('switches to month view without layout issues', async ({ page }) => {
   const labelText = await page.locator('#dayRow .label').first().textContent();
   expect(labelText).toMatch(/\d+月/);
 
-  const barBox = await page.locator('#bars .bar').first().boundingBox();
-  const labelBox = await page.locator('#taskLabels .label').first().boundingBox();
+  const barBox = await page.locator('#bars .bar:not(.cat):not(.subcat)').first().boundingBox();
+  const labelBox = await page.locator('#taskLabels .label.task').first().boundingBox();
   const barsTop = await page.locator('#bars').boundingBox();
   const labelsTop = await page.locator('#taskLabels').boundingBox();
   expect(barBox?.width || 0).toBeGreaterThan(0);

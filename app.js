@@ -189,7 +189,8 @@ export function onFitClick(){
   const grid = document.getElementById('ganttGrid');
   const containerWidth = (grid && grid.clientWidth) ? grid.clientWidth : 800;
   const totalDays = daysBetween(state.model.min, state.model.max);
-  state.model.dayWidth = Math.max(4, Math.round(containerWidth / totalDays));
+  const RIGHT_PAD = 120;
+  state.model.dayWidth = Math.max(4, Math.floor((containerWidth - RIGHT_PAD) / totalDays));
   render();
   fixBottomSync();
 }
