@@ -13,9 +13,13 @@ test('switches to week view without layout issues', async ({ page }) => {
 
   const barBox = await page.locator('#bars .bar').first().boundingBox();
   const labelBox = await page.locator('#taskLabels .label').first().boundingBox();
+  const barsTop = await page.locator('#bars').boundingBox();
+  const labelsTop = await page.locator('#taskLabels').boundingBox();
   expect(barBox?.width || 0).toBeGreaterThan(0);
   expect(labelBox?.width || 0).toBeGreaterThan(0);
-  expect(Math.abs((barBox?.y || 0) - (labelBox?.y || 0))).toBeLessThan(5);
+  const barY = (barBox?.y || 0) - (barsTop?.y || 0);
+  const labelY = (labelBox?.y || 0) - (labelsTop?.y || 0);
+  expect(Math.abs(barY - labelY)).toBeLessThan(5);
 });
 
 test('switches to month view without layout issues', async ({ page }) => {
@@ -28,7 +32,11 @@ test('switches to month view without layout issues', async ({ page }) => {
 
   const barBox = await page.locator('#bars .bar').first().boundingBox();
   const labelBox = await page.locator('#taskLabels .label').first().boundingBox();
+  const barsTop = await page.locator('#bars').boundingBox();
+  const labelsTop = await page.locator('#taskLabels').boundingBox();
   expect(barBox?.width || 0).toBeGreaterThan(0);
   expect(labelBox?.width || 0).toBeGreaterThan(0);
-  expect(Math.abs((barBox?.y || 0) - (labelBox?.y || 0))).toBeLessThan(5);
+  const barY = (barBox?.y || 0) - (barsTop?.y || 0);
+  const labelY = (labelBox?.y || 0) - (labelsTop?.y || 0);
+  expect(Math.abs(barY - labelY)).toBeLessThan(5);
 });

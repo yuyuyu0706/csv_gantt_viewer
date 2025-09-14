@@ -11,4 +11,9 @@ export async function loadSampleCsv(page) {
   await page.fill('#csvInput', csv);
   await page.click('#renderBtn');
   await page.waitForSelector('#bars .bar');
+  // Ensure modal backdrop is removed before proceeding so clicks are not blocked
+  await page.evaluate(() => {
+    const backdrop = document.getElementById('modalBackdrop');
+    if (backdrop) backdrop.remove();
+  });
 }
