@@ -204,7 +204,8 @@ export function onFitClick(){
   const containerWidth = (grid && grid.clientWidth) ? grid.clientWidth : 800;
   const totalDays = daysBetween(state.model.min, state.model.max);
   const RIGHT_PAD = 120;
-  state.model.dayWidth = Math.max(4, Math.floor((containerWidth - RIGHT_PAD) / totalDays));
+  const availableWidth = Math.max(0, containerWidth - RIGHT_PAD);
+  state.model.dayWidth = Math.max(1, Math.floor(availableWidth / totalDays));
   render();
   fixBottomSync();
 }
