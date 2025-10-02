@@ -66,8 +66,18 @@ function cmpByStartThenName(a, b){
 }
 
 // ===== DOM refs =====
-let fileInput, sampleBtn, liveToggle, zoomSel, fitBtn, csvInput, renderBtn;
+let fileInput, sampleBtn, zoomSel, fitBtn, csvInput, renderBtn;
 let headerEl, leftHead, monthRow, dayRow, labelsEl, gridEl, todayEl, previewEl, colResizer;   // v56
+
+let livePreviewTimer = 0;
+const LIVE_PREVIEW_DELAY = 400;
+
+function scheduleLivePreview(){
+  window.clearTimeout(livePreviewTimer);
+  livePreviewTimer = window.setTimeout(() => {
+    generate({ silent: true });
+  }, LIVE_PREVIEW_DELAY);
+}
 
 // ===== Preview (modal) =====
 function renderCsvPreview(text){
@@ -125,10 +135,10 @@ function bindEvents(){
 }
 
 // v64 機能分割
-export function generate(){
+export function generate(opts = {}){
   const csv = csvInput?.value ?? '';
   const mode = zoomSel?.value ?? 'day';
-  generateCore({ csvText: csv, zoomMode: mode, setZoom }); // ← setZoom を注入
+  generateCore({ csvText: csv, zoomMode: mode, setZoom, silent: opts.silent }); // ← setZoom を注入
 }
 
 // v63 ===== 画面イベント関数 =====
@@ -215,7 +225,6 @@ window.addEventListener('DOMContentLoaded', ()=>{
   // refs
   fileInput = document.getElementById('fileInput');
   sampleBtn = document.getElementById('sampleBtn');
-  liveToggle = document.getElementById('liveToggle');
   zoomSel = document.getElementById('zoom');
   fitBtn = document.getElementById('fitBtn');
   csvInput = document.getElementById('csvInput');
@@ -229,6 +238,14 @@ window.addEventListener('DOMContentLoaded', ()=>{
   gridEl = document.getElementById('ganttGrid');
   todayEl = document.getElementById('todayLine');
   previewEl = document.getElementById('csvPreview');
+  if (csvInput) {
+    csvInput.addEventListener('input', () => {
+      scheduleLivePreview();
+      if (document.body.classList.contains('modal-open')) {
+        try { renderCsvPreview(csvInput.value || ''); } catch (_) {}
+      }
+    });
+  }
   bindEvents();
   attachScrollSync();
   // 初期レンダリング前にヘッダとグリッドの水平同期を設定

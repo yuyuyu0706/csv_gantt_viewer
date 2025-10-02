@@ -18,9 +18,10 @@ import { render, fixBottomSync } from './renderer.js';
  * @param {string} args.csvText              入力 CSV テキスト
  * @param {('day'|'week'|'month')=} args.zoomMode  初期ズーム（未指定なら 'day'）
  * @param {(mode:string)=>void=} args.setZoom       外部から注入されるズーム setter
+ * @param {boolean=} args.silent         エラー時のアラートを抑制するか
  * @returns {void}
  */
-export function generateCore({ csvText, zoomMode, setZoom }) {
+export function generateCore({ csvText, zoomMode, setZoom, silent = false }) {
   try {
     buildModel(csvText || '');
     if (setZoom) setZoom(zoomMode || 'day');   // setZoom は app.js から注入
@@ -31,6 +32,6 @@ export function generateCore({ csvText, zoomMode, setZoom }) {
     const e = /** @type {unknown} */ (err);
     const msg = e instanceof Error ? e.message : String(e);
     console.error('generate error:', e);
-    alert('チャート生成に失敗: ' + msg);
+    if (!silent) alert('チャート生成に失敗: ' + msg);
   }
 }
