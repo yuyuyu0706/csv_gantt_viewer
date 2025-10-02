@@ -136,6 +136,10 @@ function bindEvents(){
 
 // v64 機能分割
 export function generate(opts = {}){
+  if (livePreviewTimer) {
+    window.clearTimeout(livePreviewTimer);
+    livePreviewTimer = 0;
+  }
   const csv = csvInput?.value ?? '';
   const mode = zoomSel?.value ?? 'day';
   generateCore({ csvText: csv, zoomMode: mode, setZoom, silent: opts.silent }); // ← setZoom を注入
