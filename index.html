@@ -3,26 +3,19 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>CSV to Gantt Viewer | v64</title>
+  <title>CSV to Gantt Viewer Green | v64</title>
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" href="./images/icons.png">
 </head>
 <body>
   <header class="app-header">
-    <h1>CSV to Gantt Viewer</h1>
-    <div class="actions">
-      <label for="csvSelector">過去履歴:</label>
-      <select id="csvSelector" disabled>
+    <h1>CSV to Gantt Viewer Green</h1>
+    <div class="actions" role="toolbar" aria-label="主要ツール">
+      <select id="csvSelector" disabled aria-label="サーバー上のCSVを選択" title="サーバー上のCSVを選択">
         <option value="">(読み込み中...)</option>
       </select>
-      <button id="toggleAllBtn" title="すべて展開/折りたたみを切替">全て折りたたむ</button>
-
-      <button id="toggleSubsBtn"  title="観点（中レベル）を一括で展開/折りたたみ">観点のみ折りたたみ</button>
-      <!-- <button id="toggleTasksBtn" title="タスク（孫）を一括で表示/非表示">タスクのみ折りたたみ</button> -->
-  
       <label class="file-btn">CSVを選択<input type="file" id="fileInput" accept=".csv,text/csv" /></label>
       <button id="previewBtn" title="CSVのプレビューを表示">CSVのプレビュー</button>
-      <label class="toggle"><input type="checkbox" id="liveToggle" checked />ライブプレビュー</label>
       <select id="zoom" title="表示スケール">
         <option value="day" selected>日表示</option>
         <option value="week">週表示</option>
@@ -36,6 +29,11 @@
   <main class="layout">
     <section class="right">
       <h2>ガントチャート</h2>
+      <div class="view-controls" role="group" aria-label="ガントチャート表示切替">
+        <button id="toggleAllBtn" title="すべて展開/折りたたみを切替">全て折りたたむ</button>
+        <button id="toggleSubsBtn" title="観点（中レベル）を一括で展開/折りたたみ">観点のみ折りたたみ</button>
+        <!-- <button id="toggleTasksBtn" title="タスク（孫）を一括で表示/非表示">タスクのみ折りたたみ</button> -->
+      </div>
       <div class="gantt-wrapper">
         <div id="ganttHeader" class="gantt-header">
           <div class="left-header" id="leftHead">
@@ -63,7 +61,18 @@
     </section>
   </main>
 
-  <footer class="app-footer">検証中</footer>
+  <footer class="app-footer">
+    <div class="readme">
+      <h2>Read Me</h2>
+      <p>CSV to Gantt Viewer Green は、CSV データからガントチャートを素早く生成できるビューワーです。</p>
+      <ul>
+        <li>CSV を選択するとチャートが自動的に更新されます。</li>
+        <li>日・週・月単位の表示切り替えや幅フィットでスケールを調整できます。</li>
+        <li>PNG 出力で現在のチャートを簡単に共有できます。</li>
+      </ul>
+      <p>サンプル CSV を開いてフォーマットを確認し、ご自身の CSV でプロジェクトの進捗を可視化してみてください。</p>
+    </div>
+  </footer>
 
   <!-- CSV モーダル -->
   <div id="modalBackdrop" class="modal-backdrop" aria-hidden="true"></div>
