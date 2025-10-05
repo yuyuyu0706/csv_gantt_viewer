@@ -4,6 +4,7 @@ export const state = {
   model: { tasks:[], groups:[], min:null, max:null, dayWidth:28 }, // 既定28px:contentReference[oaicite:13]{index=13}
   collapsedCats: new Set(),
   collapsedSubs: new Set(),
-  hideTaskRows: false
+  hideTaskRows: false,
+  subsInitialized: false
 };
 

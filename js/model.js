@@ -55,6 +55,30 @@ export function buildModel(text){
     .sort((a,b)=>{ const ra=catRank(a[0]), rb=catRank(b[0]); if(ra!==rb) return ra-rb; return a[0].localeCompare(b[0],'ja'); })
     .map(([cat,items])=>({ cat, items: items.sort((x,y)=> (x.sub||'').localeCompare(y.sub||'','ja')) }));
 
+  // 初期表示では観点（subgroup）を閉じた状態にする
+  const subgroupKeys = new Set();
+  for (const g of groups) {
+    const seen = new Set();
+    for (const t of g.items) {
+      const subName = t.sub || '(なし)';
+      if (seen.has(subName)) continue;
+      seen.add(subName);
+      subgroupKeys.add(`${g.cat}::${subName}`);
+    }
+  }
+
+  if (!state.subsInitialized) {
+    state.collapsedSubs = new Set(subgroupKeys);
+    state.subsInitialized = true;
+  } else {
+    const prev = state.collapsedSubs || new Set();
+    const next = new Set();
+    for (const key of subgroupKeys) {
+      if (prev.has(key)) next.add(key);
+    }
+    state.collapsedSubs = next;
+  }
+
   // 後続タスクの実体参照を解決
   const idMap = new Map(); for (const t of rows2) if (t.taskNo) idMap.set(String(t.taskNo), t);
   for (const t of rows2) {

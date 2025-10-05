@@ -28,5 +28,11 @@ export interface Model {
   dayWidth: number;
 }
 
-export interface AppState { model: Model; hideTaskRows: boolean; collapsedCats: Set<string>; collapsedSubs: Set<string>; }
+export interface AppState {
+  model: Model;
+  hideTaskRows: boolean;
+  collapsedCats: Set<string>;
+  collapsedSubs: Set<string>;
+  subsInitialized: boolean;
+}
 
