@@ -5,7 +5,7 @@ import { $, $$, createEl } from './js/utils/dom.js';
 import { parseCSV } from './js/utils/csv.js';
 import { toDate, fmt, fmtMD, daysBetween } from './js/utils/date.js';
 import { normHeaders, findHeaderIndex } from './js/utils/headers.js';
-import { LEFT_START_PAD_DAYS, ROW_H, BAR_H, CATEGORY_ORDER, catRank } from './js/constants.js';
+import { LEFT_START_PAD_DAYS, ROW_H, BAR_H } from './js/constants.js';
 import { state } from './js/state.js';
 // v62
 import { render, renderHeader, fixBottomSync } from './js/renderer.js';
@@ -20,6 +20,7 @@ import { syncHeaderToGrid, attachScrollSync, onColResizerMouseDown } from './js/
 import { makeOnToggleAllClick, makeOnToggleSubsClick, makeOnToggleTasksClick,
          updateToggleAllBtn, updateGlobalButtons  } from './js/toggles.js';
 import { exportPNGAll } from './js/png.js';
+import { loadAppConfig } from './js/config.js';
 
 // ===== Utils =====
 // v48 日付ラベル（M/D）をバーの左右に追加する共通ヘルパー ----
@@ -226,7 +227,13 @@ function handleServerCsvText(csvText, meta) {
 }
 
 
-window.addEventListener('DOMContentLoaded', ()=>{
+window.addEventListener('DOMContentLoaded', async ()=>{
+  try {
+    await loadAppConfig();
+  } catch (err) {
+    console.warn('[config] 初期化中に config.json を読み込めませんでした', err);
+  }
+
   // refs
   fileInput = document.getElementById('fileInput');
   sampleBtn = document.getElementById('sampleBtn');
