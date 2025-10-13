@@ -1,0 +1,10 @@
+{
+  "categoryOrderEnabled": false,
+  "categoryOrder": [
+    "マイルストーン",
+    "PMO",
+    "構築",
+    "テスト",
+    "リリース"
+  ]
+}

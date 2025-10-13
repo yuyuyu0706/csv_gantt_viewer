@@ -2,7 +2,8 @@
 import { parseCSV } from './utils/csv.js';
 import { normHeaders, findHeaderIndex } from './utils/headers.js';
 import { toDate } from './utils/date.js';
-import { LEFT_START_PAD_DAYS, catRank } from './constants.js';
+import { LEFT_START_PAD_DAYS } from './constants.js';
+import { catRank } from './config.js';
 import { state } from './state.js';
 
 // ===== CSV -> model =====

@@ -4,7 +4,7 @@ export const LEFT_START_PAD_DAYS = 7;
 export const ROW_H  = 28;
 export const BAR_H  = 20;
 
-export const CATEGORY_ORDER = [
+export const DEFAULT_CATEGORY_ORDER = [
   'マイルストーン',
   'PMO',
   '活用 PoC① AIエージェント構築',
@@ -18,6 +18,4 @@ export const CATEGORY_ORDER = [
   '構築-データ整備・連携',
   '構築-データカタログ整備'
 ];
-
-export const catRank = (name)=>{ const i=CATEGORY_ORDER.indexOf(name); return i<0? 9999 : i; };
 
