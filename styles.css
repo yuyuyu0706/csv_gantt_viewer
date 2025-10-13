@@ -135,7 +135,7 @@ textarea#csvInput{width:100%;height:220px;background:var(--code-bg);border:1px s
 
 /* Footer */
 .app-footer{padding:24px 16px;color:#5f7a6b;border-top:1px solid var(--border);background:#f6fbf7}
-.app-footer .readme{max-width:960px;margin:0 auto}
+.app-footer .readme{max-width:960px;margin:0}
 .app-footer h2{margin:0 0 12px 0;color:#115c34;font-size:18px}
 .app-footer ul{margin:0 0 12px 18px;padding:0;line-height:1.8}
 .app-footer p{margin:0 0 12px 0}
