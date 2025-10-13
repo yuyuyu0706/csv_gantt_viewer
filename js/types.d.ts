@@ -28,11 +28,21 @@ export interface Model {
   dayWidth: number;
 }
 
+export interface ViewpointOrderConfig {
+  enabled: boolean;
+  order: string[];
+}
+
+export interface AppConfig {
+  viewpointOrder: ViewpointOrderConfig;
+}
+
 export interface AppState {
   model: Model;
   hideTaskRows: boolean;
   collapsedCats: Set<string>;
   collapsedSubs: Set<string>;
   subsInitialized: boolean;
+  config: AppConfig;
 }
 

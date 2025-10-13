@@ -7,6 +7,7 @@ import { toDate, fmt, fmtMD, daysBetween } from './js/utils/date.js';
 import { normHeaders, findHeaderIndex } from './js/utils/headers.js';
 import { LEFT_START_PAD_DAYS, ROW_H, BAR_H, CATEGORY_ORDER, catRank } from './js/constants.js';
 import { state } from './js/state.js';
+import { loadConfig, getConfig } from './js/config.js';
 // v62
 import { render, renderHeader, fixBottomSync } from './js/renderer.js';
 // v63
@@ -226,7 +227,7 @@ function handleServerCsvText(csvText, meta) {
 }
 
 
-window.addEventListener('DOMContentLoaded', ()=>{
+window.addEventListener('DOMContentLoaded', async ()=>{
   // refs
   fileInput = document.getElementById('fileInput');
   sampleBtn = document.getElementById('sampleBtn');
@@ -243,6 +244,14 @@ window.addEventListener('DOMContentLoaded', ()=>{
   gridEl = document.getElementById('ganttGrid');
   todayEl = document.getElementById('todayLine');
   previewEl = document.getElementById('csvPreview');
+
+  await loadConfig();
+  state.config = getConfig();
+  if (state.model?.tasks?.length) {
+    render();
+    fixBottomSync();
+  }
+
   if (csvInput) {
     csvInput.addEventListener('input', () => {
       scheduleLivePreview();

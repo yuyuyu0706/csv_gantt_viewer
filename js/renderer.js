@@ -247,6 +247,26 @@ export function render(){
   if (!labelsEl || !canvas || !gridEl || !monthRow || !dayRow || !leftHead) return;
   if (!state.model || !state.model.min || !state.model.max) return;
 
+  const cfg = state.config || /** @type {any} */ ({});
+  const vpSetting = cfg.viewpointOrder || /** @type {any} */ ({ enabled: false, order: [] });
+  const normalizeViewName = (name) => String(name ?? '').trim();
+  const viewpointOrderMap = new Map();
+  let customViewOrderEnabled = false;
+  if (vpSetting && vpSetting.enabled && Array.isArray(vpSetting.order)) {
+    for (let i = 0; i < vpSetting.order.length; i += 1) {
+      const key = normalizeViewName(vpSetting.order[i]);
+      if (!key) continue;
+      if (viewpointOrderMap.has(key)) continue;
+      viewpointOrderMap.set(key, i);
+    }
+    customViewOrderEnabled = viewpointOrderMap.size > 0;
+  }
+  const getViewpointRank = (name) => {
+    if (!customViewOrderEnabled) return Infinity;
+    const key = normalizeViewName(name);
+    return viewpointOrderMap.has(key) ? /** @type {number} */ (viewpointOrderMap.get(key)) : Infinity;
+  };
+
   // rows list
   labelsEl.innerHTML='';
   /** @type {Row[]} */
@@ -294,6 +314,11 @@ export function render(){
         subName, items: /** @type {TaskItem[]} */(items), minS
       });
     }).sort((a, b) => {
+      if (customViewOrderEnabled) {
+        const ra = getViewpointRank(a.subName);
+        const rb = getViewpointRank(b.subName);
+        if (ra !== rb) return ra - rb;
+      }
       const ax = a.minS ? a.minS.getTime() : Infinity;
       const bx = b.minS ? b.minS.getTime() : Infinity;
       if (ax !== bx) return ax - bx;
