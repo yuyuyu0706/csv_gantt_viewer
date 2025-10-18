@@ -45,6 +45,7 @@ function statusColor(s){
   if(v==='完了済み') return '#bdbdbd';
   if(v==='開始前') return '#ffffff';
   if(v==='進行中') return '#66bb6a';
+  if(v==='次フェーズ以降') return '#bbdefb';
   if(v==='遅延') return '#ffd54f';
   return '#66bb6a';
 }
