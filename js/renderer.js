@@ -633,9 +633,9 @@ export function render(){
     // --- イナズマ対象：孫タスク(= t.task あり)で未完了/開始前の Start/End 位置を記録 ---
     const isLeaf = (r.type === 'task' || r.type === 'subtask');
     if (isLeaf) {
-      const catName = String(r.cat || '');
+      const catName = String(r.cat || '').replace(/[　]/g,' ').trim();
       const st = String(t.status || '').replace(/[　]/g,' ').trim();
-      const excludedFromLightning = (catName === '次フェーズ以降');
+      const excludedFromLightning = (catName === '次フェーズ以降' || st === '次フェーズ以降');
       if (!excludedFromLightning && st === '開始前' && (t.start instanceof Date)) {
         __zigTargets.push({
           type: 'start',
