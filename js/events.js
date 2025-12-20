@@ -59,6 +59,10 @@ export function initEvents(h = {}) {
     const el = document.getElementById('toggleTasksBtn');
     el && el.addEventListener('click', h.onToggleTasksClick);
   }
+  if (h.onShowCompletedChange) {
+    const el = document.getElementById('showDoneToggle');
+    el && el.addEventListener('change', h.onShowCompletedChange, { passive: true });
+  }
   if (h.onModalCloseClick || h.onBackdropClick || h.onEscKeydown) {
     const close = document.getElementById('modalClose');
     const backdrop = document.getElementById('modalBackdrop');
@@ -67,4 +71,3 @@ export function initEvents(h = {}) {
     if (h.onEscKeydown) window.addEventListener('keydown', h.onEscKeydown);
   }
 }
-

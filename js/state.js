@@ -5,6 +5,6 @@ export const state = {
   collapsedCats: new Set(),
   collapsedSubs: new Set(),
   hideTaskRows: false,
+  showCompleted: true,
   subsInitialized: false
 };
-
