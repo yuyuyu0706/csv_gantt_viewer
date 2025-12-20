@@ -68,7 +68,7 @@ function cmpByStartThenName(a, b){
 }
 
 // ===== DOM refs =====
-let fileInput, sampleBtn, zoomSel, fitBtn, csvInput, renderBtn;
+let fileInput, sampleBtn, zoomSel, fitBtn, csvInput, renderBtn, showDoneToggle;
 let headerEl, leftHead, monthRow, dayRow, labelsEl, gridEl, todayEl, previewEl, colResizer;   // v56
 
 let livePreviewTimer = 0;
@@ -161,6 +161,13 @@ export function onRenderClick(){ generate(); }
 export function onPreviewClick(){
   showCsvPreview(renderCsvPreview, csvInput?.value ?? '');
 }
+export function onShowCompletedChange(ev) {
+  const target = ev?.target;
+  const checked = target instanceof HTMLInputElement ? target.checked : true;
+  state.showCompleted = Boolean(checked);
+  render();
+  fixBottomSync();
+}
 // CSV読込み
 export function onFileInputChange() {
   const fileInput = document.getElementById('fileInput');
@@ -251,6 +258,10 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   gridEl = document.getElementById('ganttGrid');
   todayEl = document.getElementById('todayLine');
   previewEl = document.getElementById('csvPreview');
+  showDoneToggle = document.getElementById('showDoneToggle');
+  if (showDoneToggle && showDoneToggle instanceof HTMLInputElement) {
+    showDoneToggle.checked = !!state.showCompleted;
+  }
   if (csvInput) {
     csvInput.addEventListener('input', () => {
       scheduleLivePreview();
@@ -282,7 +293,8 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     onColResizerMouseDown,
     onToggleAllClick, onToggleSubsClick, onToggleTasksClick,
     onModalCloseClick, onBackdropClick, onEscKeydown,
-    onPngClick, onWindowResize, onFitClick
+    onPngClick, onWindowResize, onFitClick,
+    onShowCompletedChange
   });
 
   // modal closed at init
@@ -300,4 +312,3 @@ window.addEventListener('DOMContentLoaded', async ()=>{
     maxItems: 10,
   })
 });
-

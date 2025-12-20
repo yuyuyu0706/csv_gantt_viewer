@@ -177,6 +177,17 @@ function _isDoneStatus(t) {
 }
 
 /**
+ * 完了済みタスクの表示/非表示設定に従い、表示対象のタスク配列を返す
+ * @param {TaskItem[]} items
+ * @returns {TaskItem[]}
+ */
+function _visibleItems(items) {
+  const arr = ensureTasks(items);
+  if (state.showCompleted) return arr;
+  return arr.filter(it => !_isDoneStatus(it));
+}
+
+/**
  * 孫タスクのうち未完了かつ終了日が今日より前の最も近い日を返す
  * @param {TaskItem[]} tasks タスク配列
  * @param {Date} todayUTC0 今日(UTC)の00:00
@@ -257,12 +268,15 @@ export function render(){
   const groups = /** @type {any} */ (state.model.groups || []);
   for (const g of groups){
 
-    rows.push(/** @type {Row} */ ({type:'group', cat:g.cat, items:g.items}));
+    const visibleGroupItems = _visibleItems(g.items);
+    if (!visibleGroupItems.length) continue;
+
+    rows.push(/** @type {Row} */ ({type:'group', cat:g.cat, items: visibleGroupItems}));
     if (state.collapsedCats.has(g.cat)) continue;
 
     // v52: マイルストーンカテゴリは特別扱い
     if (g.cat === 'マイルストーン') {
-      for (const t of g.items) {
+      for (const t of visibleGroupItems) {
         const title = t.sub || t.task || t.name || '';
         rows.push(/** @type {Row} */ ({ type:'milestone', cat:g.cat, item:t, displayName:String(title) }));
       }
@@ -272,7 +286,7 @@ export function render(){
     // 観点ごとにグループ化
     /** @type {Map<string, TaskItem[]>} */
     const bySub = new Map();
-    for (const t of g.items){
+    for (const t of visibleGroupItems){
       const key = (t.sub || '(なし)');
       const arr = ensureTasks(bySub.get(key));
       if (!bySub.has(key)) bySub.set(key, arr);
@@ -307,12 +321,14 @@ export function render(){
       const key = `${g.cat}::${subName}`;
 
       let withTask = false;
-      for (const it of /** @type {TaskItem[]} */ (sb.items || [])) {
+      for (const it of _visibleItems(/** @type {TaskItem[]} */ (sb.items || []))) {
         if (it.task) { withTask = true; break; }
       }
 
+      const subItems = _visibleItems(sb.items);
+      if (!subItems.length) continue;
+
       // 観点見出し行
-      const subItems = ensureTasks(sb.items);
       rows.push(/** @type {SubGroupRow} */({
         type: 'subgroup',
         cat: g.cat,
@@ -942,4 +958,3 @@ function syncHeaderToGrid(){
   monthRow.style.transform = `translateX(${-x}px)`;
   dayRow.style.transform   = `translateX(${-x}px)`;
 }
-
